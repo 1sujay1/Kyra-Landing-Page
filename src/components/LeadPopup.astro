@@ -1,0 +1,21 @@
+---
+import LeadForm from './LeadForm.astro';
+import Icon from './Icon.astro';
+---
+<dialog id="lead-popup" class="modal" aria-labelledby="lead-popup-title" aria-describedby="lead-popup-sub">
+  <div class="modal-panel">
+    <button type="button" class="modal-close" data-close aria-label="Close">
+      <Icon name="close" size={22} />
+    </button>
+    <div class="rounded-t-[20px] bg-brand px-6 pt-6 pb-5 pr-16 text-white sm:px-8">
+      <p class="tamil mb-1 text-sm text-gold">இலவச தள பார்வை</p>
+      <h2 id="lead-popup-title" data-popup-title class="!text-[1.75rem] sm:!text-[2rem]">Book a free site visit</h2>
+      <p id="lead-popup-sub" data-popup-sub class="mt-2 text-[0.95rem] text-white/85">
+        Free pickup from Coimbatore. Pick a date and we will confirm the slot by phone.
+      </p>
+    </div>
+    <div class="px-6 pt-5 pb-6 sm:px-8">
+      <LeadForm id="popup" dense />
+    </div>
+  </div>
+</dialog>

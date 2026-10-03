@@ -1,0 +1,44 @@
+---
+import Base from '../layouts/Base.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import Highlights from '../components/Highlights.astro';
+import Gallery from '../components/Gallery.astro';
+import Videos from '../components/Videos.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Faq from '../components/Faq.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+import LeadPopup from '../components/LeadPopup.astro';
+import LegalModal from '../components/LegalModal.astro';
+import ConsentBanner from '../components/ConsentBanner.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+import MobileStickyBar from '../components/MobileStickyBar.astro';
+---
+<Base>
+  <Navbar />
+  <main id="main">
+    <Hero />
+    <About />
+    <Highlights />
+    <Gallery />
+    <Videos />
+    <Testimonials />
+    <Faq />
+    <Contact />
+  </main>
+  <Footer />
+
+  <LeadPopup />
+  <LegalModal name="privacy" />
+  <LegalModal name="disclaimer" />
+  <LegalModal name="terms" />
+  <ConsentBanner />
+  <FloatingWhatsApp />
+  <MobileStickyBar />
+
+  <script>
+    import '../scripts/main.ts';
+  </script>
+</Base>

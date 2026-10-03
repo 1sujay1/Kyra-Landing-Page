@@ -1,0 +1,50 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import MobileMenu from './MobileMenu.astro';
+import { nav, site } from '../content/site';
+---
+<!-- Becomes solid once this 80px sentinel scrolls out of view -->
+<div id="header-sentinel" class="pointer-events-none absolute top-0 left-0 h-20 w-px" aria-hidden="true"></div>
+
+<header id="site-header" class="site-header fixed inset-x-0 top-0 z-40">
+  <div class="container-x flex h-[var(--header-h)] items-center justify-between gap-4">
+    <a href="#home" class="shrink-0" aria-label="Kyra Group, back to top">
+      <Logo class="h-10 w-auto sm:h-11" />
+    </a>
+
+    <nav aria-label="Main" class="hidden lg:block">
+      <ul class="flex items-center gap-5 xl:gap-7">
+        {nav.map((l) => (
+          <li><a class="nav-link" href={l.href} data-spy>{l.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        href={`tel:${site.phone}`}
+        class="grid size-11 place-items-center rounded-full border border-current/25 transition-colors hover:bg-white/10"
+        aria-label={`Call ${site.phoneDisplay}`}
+        data-track="header"
+      >
+        <Icon name="phone" size={19} />
+      </a>
+      <button type="button" class="btn btn-gold hidden !min-h-11 !px-4 sm:inline-flex" data-open-lead data-intent="site_visit" data-track="header">
+        Book site visit
+      </button>
+      <button
+        id="menu-toggle"
+        type="button"
+        class="grid size-11 place-items-center rounded-full lg:hidden"
+        aria-label="Open menu"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+      >
+        <Icon name="menu" size={26} />
+      </button>
+    </div>
+  </div>
+</header>
+
+<MobileMenu />

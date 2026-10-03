@@ -1,0 +1,23 @@
+---
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+import { site } from '../content/site';
+---
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found | {site.name}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body class="grid min-h-svh place-items-center bg-surface p-6 text-center">
+    <main>
+      <Logo class="mx-auto mb-8 h-12 w-auto text-ink" />
+      <h1 class="mb-4 !text-4xl">This page does not exist</h1>
+      <p class="mb-8 text-ink-muted">The farmland is still here though.</p>
+      <a href="/" class="btn btn-gold">Back to the home page</a>
+    </main>
+  </body>
+</html>

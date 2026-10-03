@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+private/config.php
+private/geo/*.mmdb
+private/ratelimit/
+private/logs/
+private/cache/
+private/vendor/
+*.log
+.DS_Store

@@ -1,0 +1,14 @@
+---
+// [REPLACE] Placeholder wordmark built in Kyra's brand colours.
+// Swap the SVG below for the official logo (keep it inline SVG for zero requests),
+// and replace public/logo.svg (used in JSON-LD) with the same artwork.
+interface Props { class?: string; }
+const { class: cls } = Astro.props;
+---
+<svg class={cls} viewBox="0 0 196 48" width="196" height="48" role="img" aria-label="Kyra Group">
+  <rect x="0" y="0" width="48" height="48" rx="12" fill="#1B4D2E" />
+  <path d="M13 37V11h5.5v10.6L29 11h7L24.8 22.6 37 37h-7l-8.6-10.6-2.9 2.9V37z" fill="#fff" />
+  <path d="M8 41c9.5-3.6 22.5-3.6 32 0" stroke="#C5A059" stroke-width="2.5" fill="none" stroke-linecap="round" />
+  <text x="60" y="27" font-family="Marcellus, Georgia, serif" font-size="23" fill="currentColor">Kyra Group</text>
+  <text x="61" y="42" font-family="Manrope, Arial, sans-serif" font-size="10" font-weight="700" fill="#C5A059" letter-spacing=".6">Farmland · Coimbatore</text>
+</svg>

@@ -1,0 +1,52 @@
+---
+import { Picture } from 'astro:assets';
+import Icon from './Icon.astro';
+import { counters } from '../content/site';
+import about1 from '../assets/images/about-1.jpg'; // [REPLACE]
+import about2 from '../assets/images/about-2.jpg'; // [REPLACE]
+---
+<section id="about" aria-labelledby="about-title" class="py-20 sm:py-28">
+  <div class="container-x grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
+    <!-- Overlapping collage -->
+    <div class="reveal relative mx-auto w-full max-w-lg pb-16 pr-10 sm:pr-16 lg:mx-0">
+      <Picture src={about1} formats={['avif', 'webp']} widths={[400, 640, 900]} sizes="(min-width: 1024px) 460px, 85vw"
+        quality={62} alt="Rows of coconut trees on Kyra farmland" class="media aspect-[4/5] w-full object-cover" pictureAttributes={{ class: 'block' }} />
+      <Picture src={about2} formats={['avif', 'webp']} widths={[320, 520]} sizes="(min-width: 1024px) 280px, 50vw"
+        quality={62} alt="Kyra team walking a family through a plot"
+        class="media aspect-[4/3] w-full object-cover"
+        pictureAttributes={{ class: 'absolute bottom-0 right-0 block w-[58%] rounded-[20px] border-[6px] border-surface shadow-xl' }} />
+      <div class="absolute top-6 -left-2 rounded-2xl bg-brand px-5 py-4 text-white shadow-lg sm:-left-6">
+        <p class="font-display text-3xl leading-none">Since 2016</p>
+        <p class="mt-1 text-sm text-white/80">Coimbatore based</p>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <p class="eyebrow mb-3">About Kyra Group</p>
+      <h2 id="about-title" class="mb-6">Rooted in Coimbatore. Built on trust.</h2>
+      <p class="measure mb-8 text-ink-muted">
+        Kyra Group helps families and investors own farmland in the greenest pockets around Coimbatore and Pollachi. Every property we offer is personally inspected for title, road access and water availability before it reaches you, and our team supports you from site visit to registration.
+      </p>
+
+      <dl class="mb-9 grid grid-cols-2 gap-x-6 gap-y-7 border-y border-[#d6e1da] py-8 sm:grid-cols-4">
+        {counters.map((c) => (
+          <div>
+            <dt class="text-sm text-ink-muted">{c.label}</dt>
+            <dd class="font-display text-4xl text-brand" data-count={c.value} data-suffix={c.suffix}>
+              {c.value.toLocaleString('en-IN')}{c.suffix}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <button type="button" class="btn btn-green" data-open-lead data-intent="callback" data-track="about">
+        Talk to our team <Icon name="arrow-right" size={18} />
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Number above its label while keeping <dt> first in the DOM for screen readers */
+  dl > div { display: flex; flex-direction: column-reverse; gap: .25rem; }
+</style>

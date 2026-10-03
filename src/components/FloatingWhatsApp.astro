@@ -1,0 +1,14 @@
+---
+import Icon from './Icon.astro';
+import { whatsappLink } from '../content/site';
+---
+<!-- Desktop/tablet only: on phones the sticky bottom bar already has WhatsApp -->
+<a id="floating-wa" href={whatsappLink()} target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp" data-track="floating"
+  class="wa-pulse fixed right-5 bottom-5 z-30 hidden size-14 place-items-center rounded-full bg-[#25d366] text-white shadow-[0_10px_30px_-8px_rgb(0_0_0/.5)] transition-transform hover:scale-105 md:grid data-[hidden]:hidden">
+  <Icon name="whatsapp" size={30} />
+</a>
+
+<button id="back-to-top" type="button" aria-label="Back to top"
+  class="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 grid size-12 translate-y-4 place-items-center rounded-full bg-white text-brand opacity-0 shadow-lg ring-1 ring-black/5 transition-[opacity,transform] pointer-events-none md:right-6 md:bottom-24 data-[show]:pointer-events-auto data-[show]:translate-y-0 data-[show]:opacity-100">
+  <Icon name="arrow-up" size={22} />
+</button>

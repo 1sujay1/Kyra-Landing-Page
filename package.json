@@ -1,0 +1,28 @@
+{
+  "name": "kyra-landing",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build && node tools/audit-secrets.mjs",
+    "build:fast": "astro build && node tools/audit-secrets.mjs",
+    "preview": "astro preview",
+    "fonts": "node tools/copy-fonts.mjs",
+    "images:dummy": "node tools/fetch-dummy-images.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.14.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/sitemap": "^3.6.0",
+    "@fontsource-variable/manrope": "^5.2.0",
+    "@fontsource/marcellus": "^5.2.0",
+    "@fontsource/noto-sans-tamil": "^5.2.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "sharp": "^0.34.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.9.0"
+  }
+}

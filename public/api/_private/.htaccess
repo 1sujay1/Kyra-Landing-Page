@@ -1,0 +1,4 @@
+# Fallback location for config.php ONLY if your plan cannot store files outside
+# public_html. Everything here is denied. After uploading, open
+# https://<domain>/api/_private/config.php in a browser — it MUST return 403.
+Require all denied

@@ -1,0 +1,56 @@
+---
+import { getImage } from 'astro:assets';
+import Icon from './Icon.astro';
+import { videos } from '../content/videos';
+import placeholder from '../assets/images/video-placeholder.jpg';
+
+const ph = await getImage({ src: placeholder, width: 960, format: 'webp', quality: 60 });
+const thumb = (id: string) => (id.startsWith('REPLACE') ? ph.src : `https://i.ytimg.com/vi/${id}/hqdefault.jpg`);
+const [featured, ...rest] = videos;
+---
+<section id="videos" aria-labelledby="videos-title" class="bg-surface-alt py-20 sm:py-28">
+  <div class="container-x">
+    <div class="reveal mb-10 max-w-2xl">
+      <p class="eyebrow mb-3">Videos</p>
+      <h2 id="videos-title">Walk the land from your phone</h2>
+    </div>
+
+    <div class="reveal grid gap-6 lg:grid-cols-[1fr_20rem] lg:gap-8">
+      <div>
+        <div id="featured-video" class="yt-facade" data-yt data-id={featured.youtubeId} data-title={featured.title}
+          role="button" tabindex="0" aria-label={`Play video: ${featured.title}`} data-cursor="Play">
+          <img src={thumb(featured.youtubeId)} alt="" width="960" height="540" loading="lazy" decoding="async" />
+          <span class="play-btn" aria-hidden="true"><Icon name="play" size={30} /></span>
+        </div>
+        <p data-featured-title class="mt-4 font-display text-2xl">{featured.title}</p>
+      </div>
+
+      <ul class="grid grid-cols-1 gap-4 xs:grid-cols-3 lg:grid-cols-1" aria-label="More videos">
+        {rest.map((v) => (
+          <li>
+            <button type="button" class="thumb group flex w-full flex-col gap-2 rounded-[14px] text-left lg:flex-row lg:items-center lg:gap-4"
+              data-thumb data-id={v.youtubeId} data-title={v.title} aria-label={`Show video: ${v.title}`} data-cursor="Play">
+              <span class="relative block aspect-video w-full shrink-0 overflow-hidden rounded-[14px] lg:w-40">
+                <img src={thumb(v.youtubeId)} alt="" width="320" height="180" loading="lazy" decoding="async"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <span class="absolute inset-0 grid place-items-center bg-black/25">
+                  <span class="grid size-9 place-items-center rounded-full bg-gold text-ink"><Icon name="play" size={16} /></span>
+                </span>
+              </span>
+              <span data-thumb-title class="text-[0.95rem] font-semibold leading-snug">{v.title}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Used by youtube-facade.ts when a thumbnail swaps into the featured slot -->
+  <template id="featured-facade-tpl">
+    <div>
+      <img src="" alt="" width="960" height="540" decoding="async" />
+      <span class="play-btn" aria-hidden="true"><Icon name="play" size={30} /></span>
+      <span data-title class="sr-only"></span>
+    </div>
+  </template>
+</section>

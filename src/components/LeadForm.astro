@@ -1,0 +1,102 @@
+---
+// One lead form, reused by the hero card, the popup and the contact section.
+import Icon from './Icon.astro';
+import { budgets, consentText, site, whatsappLink } from '../content/site';
+
+interface Props {
+  id: string; // unique prefix for field ids
+  intent?: 'site_visit' | 'price' | 'brochure' | 'callback';
+  submitLabel?: string;
+  withMessage?: boolean;
+  dense?: boolean;
+}
+const { id, intent = 'site_visit', submitLabel = 'Book my site visit', withMessage = false, dense = false } = Astro.props;
+const f = (name: string) => `${id}-${name}`;
+const [before, after] = consentText.split('Privacy Policy');
+---
+<div data-lead-wrap>
+  <form data-lead-form data-form={id} novalidate class:list={['grid', dense ? 'gap-3' : 'gap-4']} action="/api/lead.php" method="post">
+    <input type="hidden" name="intent" value={intent} />
+    <!-- Honeypot: hidden from people and screen readers; bots fill it. -->
+    <div class="hp" aria-hidden="true">
+      <label for={f('website')}>Website</label>
+      <input id={f('website')} name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label for={f('name')}>Full name</label>
+      <input id={f('name')} name="name" type="text" class="input" autocomplete="name" required minlength="2" maxlength="60"
+        aria-describedby={f('name-err')} placeholder="Your name" />
+      <p id={f('name-err')} class="field-error" aria-live="polite"></p>
+    </div>
+
+    <div class="field">
+      <label for={f('phone')}>Mobile number</label>
+      <div class="phone-wrap">
+        <span class="prefix" aria-hidden="true">+91</span>
+        <input id={f('phone')} name="phone" type="tel" class="input" autocomplete="tel-national" inputmode="numeric" required
+          maxlength="15" aria-describedby={`${f('phone-err')} ${f('phone-hint')}`} placeholder="10-digit mobile" />
+      </div>
+      <span id={f('phone-hint')} class="sr-only">Indian mobile number, country code +91 is added for you</span>
+      <p id={f('phone-err')} class="field-error" aria-live="polite"></p>
+    </div>
+
+    <div class:list={['grid gap-4', !dense && 'sm:grid-cols-2', dense && 'gap-3 xs:grid-cols-2']}>
+      <div class="field">
+        <label for={f('budget')}>Budget</label>
+        <select id={f('budget')} name="budget" class="input" required aria-describedby={f('budget-err')}>
+          <option value="">Select budget</option>
+          {budgets.map((b) => <option value={b.value}>{b.label}</option>)}
+        </select>
+        <p id={f('budget-err')} class="field-error" aria-live="polite"></p>
+      </div>
+      <div class="field">
+        <label for={f('visit_date')}>Visit date <span class="font-normal text-ink-muted">(optional)</span></label>
+        <input id={f('visit_date')} name="visit_date" type="date" class="input" aria-describedby={f('visit_date-err')} />
+        <p id={f('visit_date-err')} class="field-error" aria-live="polite"></p>
+      </div>
+    </div>
+
+    {withMessage && (
+      <div class="field">
+        <label for={f('message')}>Message <span class="font-normal text-ink-muted">(optional)</span></label>
+        <textarea id={f('message')} name="message" rows="3" maxlength="1000" class="input resize-y"
+          aria-describedby={f('message-err')} placeholder="Plot size, preferred location, questions…"></textarea>
+        <p id={f('message-err')} class="field-error" aria-live="polite"></p>
+      </div>
+    )}
+
+    <div class="field">
+      <label class="checkbox" for={f('consent')}>
+        <input id={f('consent')} name="consent" type="checkbox" required aria-describedby={f('consent-err')} />
+        <span>{before}<a href="#privacy" data-legal="privacy" class="font-semibold text-brand-2 underline">Privacy Policy</a>{after}</span>
+      </label>
+      <p id={f('consent-err')} class="field-error" aria-live="polite"></p>
+    </div>
+
+    <button type="submit" class="btn btn-gold w-full text-[1.05rem]">
+      <span data-label>{submitLabel}</span>
+      <Icon name="arrow-right" size={18} />
+    </button>
+    <p data-status role="alert" class="text-center text-sm font-semibold text-[#b42318] empty:hidden"></p>
+    <p class="text-center text-xs text-ink-muted">Your details are safe with us. No spam.</p>
+  </form>
+
+  <div data-lead-success hidden class="py-4 text-center">
+    <div class="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-surface-alt text-brand-2">
+      <Icon name="check" size={32} />
+    </div>
+    <h3 data-success-title tabindex="-1" class="mb-2 text-2xl outline-none">Thank you, <span data-name></span>.</h3>
+    <p class="mx-auto mb-5 max-w-sm text-ink-muted">
+      Our team will call you within 30 minutes during working hours ({site.hours.toLowerCase()}).
+    </p>
+    <div class="grid gap-3">
+      <a data-brochure hidden href={site.brochureUrl} class="btn btn-green" download>
+        <Icon name="download" size={18} /> Download the brochure
+      </a>
+      <a data-success-wa href={whatsappLink()} target="_blank" rel="noopener" class="btn btn-wa" data-track="lead_success">
+        <Icon name="whatsapp" size={20} /> Chat now on WhatsApp
+      </a>
+    </div>
+  </div>
+</div>

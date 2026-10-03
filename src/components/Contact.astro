@@ -1,0 +1,50 @@
+---
+import LeadForm from './LeadForm.astro';
+import Icon from './Icon.astro';
+import { site, whatsappLink } from '../content/site';
+
+const a = site.address;
+const details = [
+  { icon: 'map-pin', label: 'Office', value: `${a.street}, ${a.locality}, ${a.city}, ${a.region} ${a.postalCode}`, href: site.directionsUrl, cta: 'Get directions', ext: true },
+  { icon: 'phone', label: 'Phone', value: site.phoneDisplay, href: `tel:${site.phone}`, cta: 'Call now' },
+  { icon: 'whatsapp', label: 'WhatsApp', value: site.phoneDisplay, href: whatsappLink(), cta: 'Chat on WhatsApp', ext: true },
+  { icon: 'mail', label: 'Email', value: site.email, href: `mailto:${site.email}`, cta: 'Send an email' },
+  { icon: 'clock', label: 'Working hours', value: site.hours },
+] as const;
+---
+<section id="contact" aria-labelledby="contact-title" class="py-20 sm:py-28">
+  <div class="container-x grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
+    <div class="reveal card p-6 sm:p-10">
+      <p class="eyebrow mb-3">Contact</p>
+      <h2 id="contact-title" class="mb-3">Plan your site visit</h2>
+      <p class="mb-8 text-ink-muted">Tell us when you would like to visit. We arrange pickup from Coimbatore and call to confirm.</p>
+      <LeadForm id="contact" withMessage submitLabel="Book my site visit" />
+    </div>
+
+    <div class="reveal flex flex-col">
+      <h3 class="mb-6 text-2xl sm:text-3xl">Talk to us directly</h3>
+      <ul class="grid gap-5">
+        {details.map((d) => (
+          <li class="flex gap-4">
+            <span class="grid size-12 shrink-0 place-items-center rounded-xl bg-surface-alt text-brand"><Icon name={d.icon} size={22} /></span>
+            <div>
+              <p class="text-sm text-ink-muted">{d.label}</p>
+              <p class="font-semibold">{d.value}</p>
+              {'href' in d && (
+                <a href={d.href} class="mt-1 inline-flex min-h-8 items-center gap-1 text-sm font-bold text-brand-2 underline-offset-4 hover:underline"
+                  target={'ext' in d ? '_blank' : undefined} rel={'ext' in d ? 'noopener' : undefined} data-track="contact">
+                  {d.cta} <Icon name="arrow-right" size={14} />
+                </a>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div class="mt-10 rounded-[20px] bg-brand p-7 text-white">
+        <p class="tamil mb-2 text-gold" lang="ta">இலவச பிக்கப் வசதி</p>
+        <p class="mb-5 font-display text-2xl">Free pickup and drop from Coimbatore for every site visit.</p>
+        <button type="button" class="btn btn-gold" data-open-lead data-intent="site_visit" data-track="contact_card">Book a free site visit</button>
+      </div>
+    </div>
+  </div>
+</section>

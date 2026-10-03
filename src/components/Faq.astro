@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro';
+import { faq } from '../content/faq';
+import { site, whatsappLink } from '../content/site';
+---
+<section id="faq" aria-labelledby="faq-title" class="bg-surface-alt py-20 sm:py-28">
+  <div class="container-x grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+    <div class="reveal">
+      <p class="eyebrow mb-3">FAQ</p>
+      <h2 id="faq-title" class="mb-5">Questions buyers ask us most</h2>
+      <p class="mb-7 text-ink-muted">Still unsure about something? Ask us directly. We reply on WhatsApp within minutes during working hours.</p>
+      <a href={whatsappLink('Hi, I have a question about the farmland plots near Coimbatore')} target="_blank" rel="noopener" class="btn btn-outline" data-track="faq">
+        <Icon name="whatsapp" size={20} /> Ask on WhatsApp
+      </a>
+      <p class="mt-4 text-sm text-ink-muted">or call <a href={`tel:${site.phone}`} class="font-semibold text-brand underline" data-track="faq">{site.phoneDisplay}</a></p>
+    </div>
+
+    <!-- <details name> = native exclusive accordion: one open at a time, no JS -->
+    <div class="reveal grid gap-3">
+      {faq.map((f, i) => (
+        <details class="faq-item rounded-[16px] transition-colors" name="faq" open={i === 0}>
+          <summary class="flex min-h-16 items-center justify-between gap-4 px-5 py-4 text-[1.05rem] font-bold sm:px-6">
+            {f.q}
+            <span class="chev grid size-9 shrink-0 place-items-center rounded-full bg-white text-brand"><Icon name="plus" size={18} /></span>
+          </summary>
+          <p class="measure px-5 pb-5 text-ink-muted sm:px-6">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,76 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+import { gallery, galleryFilters } from '../content/gallery';
+
+// Resolve file names from content/gallery.ts to optimisable image imports.
+const files = import.meta.glob<{ default: ImageMetadata }>('../assets/images/gallery/*.{jpg,jpeg,png,webp,avif}', { eager: true });
+const items = await Promise.all(
+  gallery.map(async (g) => {
+    const mod = files[`../assets/images/gallery/${g.file}`];
+    if (!mod) throw new Error(`Gallery image not found: src/assets/images/gallery/${g.file}`);
+    const full = await getImage({ src: mod.default, width: Math.min(1600, mod.default.width), format: 'webp', quality: 72 });
+    return { ...g, img: mod.default, full: full.src };
+  }),
+);
+---
+<section id="gallery" aria-labelledby="gallery-title" class="py-20 sm:py-28">
+  <div class="container-x">
+    <div class="reveal mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="eyebrow mb-3">Gallery</p>
+        <h2 id="gallery-title">See the land before you visit</h2>
+      </div>
+      <div class="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0" role="group" aria-label="Filter photos">
+        <div class="flex gap-2">
+          {galleryFilters.map((f, i) => (
+            <button type="button" class="filter-tab min-h-11 shrink-0 rounded-full border border-[#c9d3cc] px-4 text-sm font-semibold transition-colors hover:border-brand"
+              data-filter={f.value} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+    <p data-gallery-status class="sr-only" aria-live="polite"></p>
+
+    <ul class="masonry reveal" role="list">
+      {items.map((g) => (
+        <li>
+          <button type="button" class="g-item group relative block w-full overflow-hidden rounded-[20px] text-left"
+            data-category={g.category} data-full={g.full} data-alt={g.alt} data-caption={g.caption} data-cursor="View"
+            aria-label={`Open photo: ${g.caption}`}>
+            <figure>
+              <Picture src={g.img} formats={['avif', 'webp']} widths={[400, 600, 800]}
+                sizes="(min-width: 1024px) 380px, (min-width: 560px) 48vw, 92vw" quality={60} alt={g.alt}
+                loading="lazy" class="h-auto w-full" pictureAttributes={{ class: 'block' }} />
+              <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-4 pt-10 pb-3 text-sm font-semibold text-white">
+                {g.caption}
+              </figcaption>
+            </figure>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<dialog id="lightbox" class="lightbox" aria-label="Photo viewer">
+  <div class="flex h-full flex-col">
+    <div class="flex items-center justify-between px-4 py-3">
+      <p data-lb-count class="text-sm font-semibold tabular-nums" aria-live="polite"></p>
+      <button type="button" class="grid size-12 place-items-center rounded-full bg-white/10 hover:bg-white/20" data-close aria-label="Close photo viewer">
+        <Icon name="close" size={24} />
+      </button>
+    </div>
+    <div data-lb-stage class="relative flex flex-1 items-center justify-center px-2 sm:px-20">
+      <img alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" decoding="async" />
+      <button type="button" data-lb-prev class="absolute left-2 top-1/2 hidden size-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 hover:bg-white/20 sm:grid sm:left-5" aria-label="Previous photo">
+        <Icon name="chevron-left" size={26} />
+      </button>
+      <button type="button" data-lb-next class="absolute right-2 top-1/2 hidden size-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 hover:bg-white/20 sm:grid sm:right-5" aria-label="Next photo">
+        <Icon name="chevron-right" size={26} />
+      </button>
+    </div>
+    <p data-lb-caption class="px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center text-white/85"></p>
+  </div>
+</dialog>

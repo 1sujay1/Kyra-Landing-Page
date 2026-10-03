@@ -1,0 +1,61 @@
+---
+import Icon from './Icon.astro';
+---
+<!-- Non-modal banner (shown by consent-ui.ts only when no choice is stored) -->
+<div id="consent-banner" hidden role="region" aria-label="Cookie consent"
+  class="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-3xl rounded-[18px] bg-white p-5 text-ink shadow-[0_20px_60px_-15px_rgb(0_0_0/.45)] ring-1 ring-black/5 md:bottom-5 sm:p-6">
+  <p class="mb-4 text-[0.95rem] leading-relaxed">
+    We use cookies and collect your IP-based approximate location to improve our service and measure ads.
+    <a href="#privacy" data-legal="privacy" class="font-semibold text-brand-2 underline">Privacy Policy</a>
+  </p>
+  <div class="flex flex-wrap gap-2">
+    <button type="button" class="btn btn-green !min-h-11 flex-1 sm:flex-none" data-consent-accept>Accept</button>
+    <button type="button" class="btn btn-outline !min-h-11 flex-1 sm:flex-none" data-consent-reject>Reject</button>
+    <a href="#cookies" data-legal="cookies" class="btn !min-h-11 flex-1 text-brand underline-offset-4 hover:underline sm:flex-none">Preferences</a>
+  </div>
+</div>
+
+<!-- Cookie preferences modal (also opened from the footer) -->
+<dialog id="modal-cookies" class="modal" aria-labelledby="modal-cookies-title">
+  <div class="modal-panel">
+    <button type="button" class="modal-close" data-close aria-label="Close cookie preferences">
+      <Icon name="close" size={22} />
+    </button>
+    <div class="px-6 pt-7 pb-8 sm:px-8">
+      <h2 id="modal-cookies-title" class="mb-2 pr-12 !text-3xl">Cookie preferences</h2>
+      <p class="mb-6 text-[0.95rem] text-ink-muted">Choose what we may use. You can change this at any time from the footer.</p>
+
+      <ul class="mb-7 grid gap-3">
+        <li class="flex items-start justify-between gap-4 rounded-xl bg-surface p-4">
+          <div>
+            <p class="font-bold">Essential</p>
+            <p class="text-sm text-ink-muted">Runs the site and the enquiry form, and keeps a hashed (not raw) IP with approximate city to stop spam. Always on.</p>
+          </div>
+          <span class="shrink-0 text-sm font-bold text-brand-2">Always on</span>
+        </li>
+        <li>
+          <label for="pref-analytics" class="flex cursor-pointer items-start justify-between gap-4 rounded-xl bg-surface p-4">
+            <span>
+              <span class="block font-bold">Analytics</span>
+              <span class="text-sm text-ink-muted">Google Analytics, Google Maps and storing your raw IP address with approximate location.</span>
+            </span>
+            <input id="pref-analytics" type="checkbox" class="mt-1 size-5 shrink-0 accent-[var(--brand-primary)]" />
+          </label>
+        </li>
+        <li>
+          <label for="pref-marketing" class="flex cursor-pointer items-start justify-between gap-4 rounded-xl bg-surface p-4">
+            <span>
+              <span class="block font-bold">Advertising</span>
+              <span class="text-sm text-ink-muted">Meta (Facebook / Instagram) Pixel and Google Ads, to measure and improve our ads.</span>
+            </span>
+            <input id="pref-marketing" type="checkbox" class="mt-1 size-5 shrink-0 accent-[var(--brand-primary)]" />
+          </label>
+        </li>
+      </ul>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn btn-green" data-consent-save>Save preferences</button>
+        <button type="button" class="btn btn-outline" data-consent-accept-all>Accept all</button>
+      </div>
+    </div>
+  </div>
+</dialog>

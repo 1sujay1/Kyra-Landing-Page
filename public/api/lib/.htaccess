@@ -1,0 +1,2 @@
+# Library code is included by the endpoints only — never served.
+Require all denied

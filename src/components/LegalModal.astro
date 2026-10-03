@@ -1,0 +1,21 @@
+---
+import Icon from './Icon.astro';
+import { legal, type LegalKey } from '../content/legal';
+
+interface Props { name: LegalKey; }
+const { name: key } = Astro.props;
+const doc = legal[key];
+---
+<dialog id={`modal-${key}`} class="modal !max-w-[min(44rem,calc(100vw-2rem))]" aria-labelledby={`modal-${key}-title`}>
+  <div class="modal-panel">
+    <button type="button" class="modal-close" data-close aria-label={`Close ${doc.title}`}>
+      <Icon name="close" size={22} />
+    </button>
+    <div class="px-6 pt-7 pb-8 sm:px-10 sm:pt-9">
+      <h2 id={`modal-${key}-title`} class="mb-1 pr-12 !text-3xl">{doc.title}</h2>
+      <p class="mb-6 text-sm text-ink-muted">Last updated: {doc.updated}</p>
+      <div class="prose-legal" set:html={doc.body} />
+      <button type="button" class="btn btn-green mt-4" data-close>Close</button>
+    </div>
+  </div>
+</dialog>

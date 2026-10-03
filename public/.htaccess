@@ -1,0 +1,79 @@
+# ════════════════════════════════════════════════════════════════════════════
+# Kyra Group landing page — Hostinger (LiteSpeed / Apache)
+# [VERIFY] canonical host below: currently non-www https://kyragroupindia.com
+# ════════════════════════════════════════════════════════════════════════════
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+AddDefaultCharset utf-8
+
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+  AddType image/avif .avif
+  AddType image/webp .webp
+  AddType application/manifest+json .webmanifest
+</IfModule>
+
+# ─── HTTPS + single canonical host ───────────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Let's Encrypt / Hostinger SSL validation must keep working over http
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
+
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://kyragroupindia.com%{REQUEST_URI} [L,R=301,NE]
+
+  # Hidden files and folders (.git, .env, …) → 404. .well-known stays reachable.
+  RewriteRule (^|/)\.(?!well-known/) - [R=404,L]
+</IfModule>
+
+# ─── Block sensitive files ───────────────────────────────────────────────────
+<FilesMatch "(\.(md|env|ini|log|sh|sql|lock|bak|old|orig|swp|dist|example|ya?ml|jsonl|mmdb)$|^composer\.(json|lock)$|^package(-lock)?\.json$|^config.*\.php$|^\.)">
+  Require all denied
+</FilesMatch>
+
+# ─── Security headers ────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Frame-Options "DENY"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+
+  # CSP: self + YouTube (nocookie) + Google Maps embed + Meta Pixel + Google tag (GA4/Ads).
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://connect.facebook.net https://www.googletagmanager.com https://www.google-analytics.com https://googleads.g.doubleclick.net https://www.googleadservices.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com https://www.facebook.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.google.com https://www.google.co.in https://maps.gstatic.com https://maps.googleapis.com; font-src 'self'; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://connect.facebook.net https://www.facebook.com https://googleads.g.doubleclick.net https://www.google.com; frame-src https://www.youtube-nocookie.com https://www.google.com https://maps.google.com https://td.doubleclick.net https://www.googletagmanager.com; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+
+  # ─── Caching ───────────────────────────────────────────────────────────────
+  # HTML: always revalidate so new deploys show immediately
+  <FilesMatch "\.html?$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Self-hosted fonts and root images (not content-hashed): 30 days
+  <FilesMatch "\.(woff2|svg|jpe?g|png|webp|avif|ico)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  # sitemap / robots: 1 day
+  <FilesMatch "^(robots\.txt|sitemap.*\.xml)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
+# Hashed build assets in /_astro/ get "immutable" from _astro/.htaccess
+
+# ─── Compression (LiteSpeed also compresses static files automatically) ─────
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/xml application/javascript application/json application/xml image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# ─── LiteSpeed cache: static files only, never /api/ ─────────────────────────
+<IfModule LiteSpeed>
+  CacheLookup on
+  RewriteEngine On
+  RewriteRule ^api/ - [E=Cache-Control:no-cache]
+</IfModule>

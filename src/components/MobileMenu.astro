@@ -1,0 +1,40 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { nav, site, whatsappLink } from '../content/site';
+---
+<dialog id="mobile-menu" class="mobile-menu" aria-label="Menu">
+  <div class="flex h-full flex-col">
+    <div class="container-x flex h-[var(--header-h)] items-center justify-between">
+      <Logo class="h-10 w-auto text-white" />
+      <button type="button" class="grid size-12 place-items-center rounded-full bg-white/10" data-close aria-label="Close menu">
+        <Icon name="close" size={26} />
+      </button>
+    </div>
+    <nav aria-label="Mobile" class="container-x flex-1 overflow-y-auto py-4">
+      <ul class="grid gap-1">
+        {nav.map((l) => (
+          <li>
+            <a href={l.href} data-spy class="flex min-h-14 items-center justify-between border-b border-white/10 font-display text-2xl">
+              {l.label}<Icon name="arrow-right" size={20} class="text-gold" />
+            </a>
+          </li>
+        ))}
+        <li>
+          <a href="#faq" class="flex min-h-14 items-center justify-between border-b border-white/10 font-display text-2xl">
+            FAQ<Icon name="arrow-right" size={20} class="text-gold" />
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="container-x grid gap-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4">
+      <button type="button" class="btn btn-gold w-full" data-open-lead data-intent="site_visit" data-track="mobile_menu">
+        Book a free site visit
+      </button>
+      <div class="grid grid-cols-2 gap-3">
+        <a href={`tel:${site.phone}`} class="btn btn-ghost-light" data-track="mobile_menu"><Icon name="phone" size={18} /> Call</a>
+        <a href={whatsappLink()} target="_blank" rel="noopener" class="btn btn-ghost-light" data-track="mobile_menu"><Icon name="whatsapp" size={18} /> WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</dialog>

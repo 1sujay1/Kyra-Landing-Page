@@ -1,0 +1,63 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { nav, site, whatsappLink } from '../content/site';
+
+const year = new Date().getFullYear();
+const socials = [
+  { name: 'facebook', label: 'Facebook', href: site.socials.facebook },
+  { name: 'instagram', label: 'Instagram', href: site.socials.instagram },
+  { name: 'youtube', label: 'YouTube', href: site.socials.youtube },
+  { name: 'linkedin', label: 'LinkedIn', href: site.socials.linkedin },
+] as const;
+const legalLinks = [
+  { key: 'privacy', label: 'Privacy Policy' },
+  { key: 'disclaimer', label: 'Disclaimer' },
+  { key: 'terms', label: 'Terms of Use' },
+  { key: 'cookies', label: 'Cookie preferences' },
+];
+---
+<footer class="bg-[#10301d] pt-16 pb-28 text-white/80 md:pb-10">
+  <div class="container-x grid gap-10 md:grid-cols-[1.4fr_1fr_1.2fr]">
+    <div>
+      <Logo class="mb-4 h-11 w-auto text-white" />
+      <p class="max-w-xs text-[0.95rem]">Clear-title farmland plots in the green belt between Coimbatore and Pollachi.</p>
+      <ul class="mt-6 flex gap-2" aria-label="Kyra Group on social media">
+        {socials.map((s) => (
+          <li>
+            <a href={s.href} target="_blank" rel="noopener" aria-label={s.label}
+              class="grid size-11 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-gold hover:text-brand">
+              <Icon name={s.name} size={19} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <nav aria-label="Footer">
+      <h2 class="mb-4 font-sans !text-base font-bold text-white">Quick links</h2>
+      <ul class="grid grid-cols-2 gap-x-4 gap-y-1 text-[0.95rem]">
+        {[...nav, { href: '#faq', label: 'FAQ' }].map((l) => (
+          <li><a href={l.href} class="inline-flex min-h-10 items-center hover:text-gold">{l.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <div>
+      <h2 class="mb-4 font-sans !text-base font-bold text-white">Get in touch</h2>
+      <ul class="grid gap-3 text-[0.95rem]">
+        <li><a href={`tel:${site.phone}`} class="inline-flex items-center gap-2 hover:text-gold" data-track="footer"><Icon name="phone" size={17} />{site.phoneDisplay}</a></li>
+        <li><a href={whatsappLink()} target="_blank" rel="noopener" class="inline-flex items-center gap-2 hover:text-gold" data-track="footer"><Icon name="whatsapp" size={17} />WhatsApp us</a></li>
+        <li><a href={`mailto:${site.email}`} class="inline-flex items-center gap-2 hover:text-gold"><Icon name="mail" size={17} />{site.email}</a></li>
+        <li class="flex gap-2"><Icon name="map-pin" size={17} class="mt-1 shrink-0" />{site.address.locality}, {site.address.city}, {site.address.region}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-x mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm md:flex-row md:items-center md:justify-between">
+    <p>© {year} Kyra Group. All rights reserved.</p>
+    <ul class="flex flex-wrap gap-x-5 gap-y-1">
+      {legalLinks.map((l) => (
+        <li><a href={`#${l.key}`} data-legal={l.key} class="inline-flex min-h-10 items-center underline-offset-4 hover:text-gold hover:underline">{l.label}</a></li>
+      ))}
+    </ul>
+  </div>
+</footer>

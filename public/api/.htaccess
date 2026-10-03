@@ -1,0 +1,23 @@
+# /api — only the three public endpoints are reachable.
+Options -Indexes
+
+# Deny every PHP file, then allow the endpoints (later sections win).
+<Files "*">
+  Require all denied
+</Files>
+<FilesMatch "^(lead|track|consent)\.php$">
+  Require all granted
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # lib/ and the fallback _private/ folder are never web-accessible
+  RewriteRule ^(lib|_private)(/|$) - [F,L]
+  # Never let LiteSpeed cache API responses
+  RewriteRule .* - [E=Cache-Control:no-cache]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set Cache-Control "no-store"
+  Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
