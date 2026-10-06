@@ -1,8 +1,8 @@
 node_modules/
 dist/
 .astro/
-.env
-.env.*
+# .env
+# .env.*
 private/config.php
 private/geo/*.mmdb
 private/ratelimit/

@@ -38,7 +38,6 @@ const rules: Record<string, Rule> = {
     return v < min || v > max ? 'Choose a date within the next 30 days' : '';
   },
   message: (v) => (v.length > 1000 ? 'Message must be 1000 characters or fewer' : ''),
-  consent: (_v, el) => ((el as HTMLInputElement).checked ? '' : 'Please agree to be contacted so we can reach you'),
 };
 
 function setError(el: Field, msg: string) {
@@ -80,6 +79,14 @@ function showSuccess(wrap: HTMLElement, name: string, intent: string) {
   $<HTMLElement>('[data-success-title]', ok)?.focus();
 }
 
+const CRM_BASE_URL =
+  import.meta.env.PUBLIC_CRM_BASE_URL ||
+  (typeof window !== 'undefined' && (window as any).CRM_BASE_URL) ||
+  'https://crm.kyragroupindia.com';
+
+// Manually append API path at component script level:
+const LANDING_LEAD_API = `${CRM_BASE_URL.replace(/\/+$/, '')}/api/leads/landing`;
+
 async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   const fields = $$<Field>('input, select, textarea', form).filter((f) => rules[f.name]);
   const firstBad = fields.filter((f) => !validateField(f))[0]; // validate all, focus the first
@@ -97,47 +104,44 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
 
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');
-  label.textContent = 'Sending...';
+  label.textContent = 'Submitting...';
   status.textContent = '';
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 15000);
+  const timer = setTimeout(() => ctrl.abort(), 30000);
+
+  const payload = {
+    full_name: get('name'),
+    name: get('name'),
+    phone: normalisePhone(get('phone')),
+    mobile: normalisePhone(get('phone')),
+    email: get('email'),
+    project_name: 'Kyra Farmlands',
+    project: 'KYRA_FARMLANDS',
+    source: 'contact_form',
+    campaign_name: 'Landing Page Enquiry',
+    budget_range: get('budget') || '₹35L - ₹50L',
+    purpose: 'farmhouse',
+    message: get('message') || '',
+    intent,
+    visit_date: get('visit_date') || null,
+    page_url: location.href.slice(0, 500),
+  };
+
   try {
-    const res = await fetch('/api/lead.php', {
+    const res = await fetch(LANDING_LEAD_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
       signal: ctrl.signal,
-      body: JSON.stringify({
-        name: get('name'),
-        phone: normalisePhone(get('phone')),
-        budget: get('budget'),
-        visit_date: get('visit_date'),
-        message: get('message'),
-        intent,
-        consent: (form.elements.namedItem('consent') as HTMLInputElement).checked,
-        website: get('website'), // honeypot — must stay empty
-        elapsed_ms: Date.now() - startedAt,
-        visitor_id: ids.visitor,
-        session_id: ids.session,
-        attribution,
-        consent_status: consentStatus(),
-        page_url: location.href.slice(0, 500),
-        fbp: getCookie('_fbp') || '',
-        fbc: getCookie('_fbc') || '',
-      }),
+      body: JSON.stringify(payload),
     });
+
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.ok) {
-      if (data.field) {
-        const el = form.elements.namedItem(data.field) as Field | null;
-        if (el) { setError(el, data.error); el.focus(); }
-      }
-      throw new ServerMessage(data.error || 'We could not send your details. Please try again.');
+
+    if (!res.ok || data.success === false || data.ok === false) {
+      throw new ServerMessage(data.message || data.error || `Server responded with status ${res.status}. Please try again.`);
     }
 
-    // Lead form consent counts as consent for measurement — unless the visitor
-    // explicitly rejected cookies in the banner earlier.
     if (consentStatus() === 'pending') setConsent(true, true, 'lead_form');
     if (data.leadId && data.eventId) fireLeadConversion(data.eventId, intent);
 
@@ -145,10 +149,16 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
     document.dispatchEvent(new CustomEvent('kyra:lead-success', { detail: { intent } }));
     showSuccess(wrap, get('name'), intent);
   } catch (err) {
-    status.textContent =
-      err instanceof ServerMessage ? err.message
-      : err instanceof DOMException && err.name === 'AbortError' ? 'This is taking too long. Please check your connection and try again.'
-      : 'We could not send your details. Please check your connection, try again or call us.';
+    console.error('[Lead Form Submission Error]', err);
+    if (err instanceof ServerMessage) {
+      status.textContent = err.message;
+    } else if (err instanceof DOMException && err.name === 'AbortError') {
+      status.textContent = `Request timed out after 30s. Please check if CRM server at ${CRM_BASE_URL} is responding.`;
+    } else if (err instanceof TypeError) {
+      status.textContent = `Unable to connect to CRM backend at ${CRM_BASE_URL}. Please ensure your CRM server is running.`;
+    } else {
+      status.textContent = 'Submission failed. Please check your connection or call us directly.';
+    }
   } finally {
     clearTimeout(timer);
     btn.disabled = false;

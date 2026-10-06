@@ -64,6 +64,15 @@ function validate_lead(array $in): array
         $visitDate = $rawDate;
     }
 
+    $email = null;
+    $rawEmail = is_string($in['email'] ?? null) ? trim($in['email']) : '';
+    if ($rawEmail !== '') {
+        if (!filter_var($rawEmail, FILTER_VALIDATE_EMAIL)) {
+            return [null, 'Enter a valid email address', 'email'];
+        }
+        $email = strtolower($rawEmail);
+    }
+
     $message = clean_text($in['message'] ?? '', 1000, true);
 
     if (($in['consent'] ?? false) !== true) return [null, 'Please agree to be contacted so we can reach you', 'consent'];
@@ -71,6 +80,7 @@ function validate_lead(array $in): array
     return [[
         'name' => $name,
         'phone' => $phone,
+        'email' => $email,
         'budget' => $budget,
         'intent' => $intent,
         'visit_date' => $visitDate,

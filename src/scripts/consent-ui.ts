@@ -18,12 +18,8 @@ function sync(c: Consent, source: string) {
 
 export function initConsentUI() {
   const banner = $('#consent-banner');
-  const prefs = $<HTMLDialogElement>('#modal-cookies');
-  const analytics = $<HTMLInputElement>('#pref-analytics');
-  const marketing = $<HTMLInputElement>('#pref-marketing');
-
-  const hideBanner = () => banner?.setAttribute('hidden', '');
-  if (!getConsent() && banner) banner.hidden = false;
+  if (banner) banner.hidden = true;
+  banner?.setAttribute('hidden', '');
 
   const decide = (a: boolean, m: boolean, source: 'banner' | 'preferences') => {
     const { consent } = setConsent(a, m, source);

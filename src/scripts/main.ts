@@ -15,13 +15,14 @@ import { initCarousel } from './carousel';
 import { initLegal } from './legal';
 import { initFloating, initMap } from './floating';
 import { initCursor } from './cursor';
+import { initVisitorTracking } from './visitor-tracking';
 
 const safe = (fn: () => void) => {
   try { fn(); } catch (e) { console.error(e); }
 };
 
 // Critical UI first
-[initHeader, initLeadForms, initPopup, initLegal, initConsentUI, initFloating, initReveal].forEach(safe);
+[initHeader, initLeadForms, initPopup, initLegal, initConsentUI, initFloating, initReveal, initVisitorTracking].forEach(safe);
 // Then everything below the fold and measurement
 [initCounters, initGallery, initVideos, initCarousel, initMap, initTracking, initAnalytics].forEach(safe);
 onIdle(() => safe(initCursor));

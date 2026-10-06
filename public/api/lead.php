@@ -80,6 +80,7 @@ $row = [
     'visitor_id' => $visitorId,
     'name' => $lead['name'],
     'phone' => $lead['phone'],
+    'email' => $lead['email'] ?? null,
     'budget' => $lead['budget'],
     'visit_date' => $lead['visit_date'],
     'message' => $lead['message'],

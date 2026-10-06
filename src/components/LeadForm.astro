@@ -15,7 +15,7 @@ const f = (name: string) => `${id}-${name}`;
 const [before, after] = consentText.split('Privacy Policy');
 ---
 <div data-lead-wrap>
-  <form data-lead-form data-form={id} novalidate class:list={['grid', dense ? 'gap-3' : 'gap-4']} action="/api/lead.php" method="post">
+  <form data-lead-form data-form={id} novalidate class:list={['grid', dense ? 'gap-3' : 'gap-4']} action="#" method="post">
     <input type="hidden" name="intent" value={intent} />
     <!-- Honeypot: hidden from people and screen readers; bots fill it. -->
     <div class="hp" aria-hidden="true">
@@ -66,12 +66,8 @@ const [before, after] = consentText.split('Privacy Policy');
       </div>
     )}
 
-    <div class="field">
-      <label class="checkbox" for={f('consent')}>
-        <input id={f('consent')} name="consent" type="checkbox" required aria-describedby={f('consent-err')} />
-        <span>{before}<a href="#privacy" data-legal="privacy" class="font-semibold text-brand-2 underline">Privacy Policy</a>{after}</span>
-      </label>
-      <p id={f('consent-err')} class="field-error" aria-live="polite"></p>
+    <div class="field text-xs text-ink-muted">
+      <span>By submitting, you agree to be contacted by Kyra Group. Read our <a href="#privacy" data-legal="privacy" class="font-semibold text-brand-2 underline">Privacy Policy</a>.</span>
     </div>
 
     <button type="submit" class="btn btn-gold w-full text-[1.05rem]">

@@ -31,6 +31,7 @@ function notify_lead(array $lead, array $ctx): void
         !empty($ctx['source']) ? ', source ' . $ctx['source'] : ''
     );
 
+    notify_crm($lead, $ctx);
     notify_email($lead, $summary, $ctx);
 
     $provider = (string) cfg('WHATSAPP_PROVIDER', 'none');
@@ -45,6 +46,51 @@ function notify_lead(array $lead, array $ctx): void
     whatsapp_send($provider, '91' . $lead['phone'], (string) cfg('WA_TEMPLATE_LEAD', 'lead_thank_you'), [
         explode(' ', $lead['name'])[0],
     ]);
+}
+
+/** Posts the newly captured lead directly into the Kyra CRM backend database */
+function notify_crm(array $lead, array $ctx): void
+{
+    $crmUrl = (string) cfg('CRM_WEBHOOK_URL', 'https://crm.kyragroupindia.com/api/webhooks/leads');
+    if (empty($crmUrl)) return;
+
+    $payload = [
+        'full_name'    => $lead['name'],
+        'name'         => $lead['name'],
+        'phone'        => $lead['phone'],
+        'mobile'       => $lead['phone'],
+        'email'        => $lead['email'] ?? '',
+        'city'         => $ctx['city'] ?? 'Coimbatore',
+        'project_name' => 'KYRA GROUP INDIA',
+        'project'      => 'KYRA_GROUP_INDIA',
+        'source'       => 'website',
+        'campaign_name'=> !empty($ctx['source']) ? $ctx['source'] : 'Landing Page Enquiry',
+        'budget_range' => BUDGET_LABELS[$lead['budget']] ?? ($lead['budget'] ?? '₹35L - ₹50L'),
+        'purpose'      => 'farmhouse',
+        'message'      => $lead['message'] ?? '',
+        'intent'       => INTENT_LABELS[$lead['intent']] ?? ($lead['intent'] ?? 'site_visit'),
+        'visit_date'   => $lead['visit_date'] ?? null,
+        'page_url'     => $ctx['page_url'] ?? null,
+    ];
+
+    $ch = curl_init($crmUrl);
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_UNICODE),
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 4,
+        CURLOPT_TIMEOUT        => 8,
+    ]);
+    $raw = curl_exec($ch);
+    $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+
+    if ($status < 200 || $status >= 300) {
+        app_log('warn', 'crm webhook notification failed', ['status' => $status, 'url' => $crmUrl, 'res' => substr((string) $raw, 0, 200)]);
+    } else {
+        app_log('info', 'crm webhook notification success', ['status' => $status, 'lead_id' => $ctx['lead_id'] ?? null]);
+    }
 }
 
 function notify_email(array $lead, string $summary, array $ctx): void
