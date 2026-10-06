@@ -94,49 +94,36 @@ function showSuccess(wrap: HTMLElement, name: string, intent: string) {
 }
 
 function getCrmBaseUrl() {
-  if (typeof window !== "undefined") {
-    if ((window as any).CRM_BASE_URL)
-      return String((window as any).CRM_BASE_URL);
-    const envUrl =
-      import.meta.env.PUBLIC_CRM_BASE_URL || "https://crm.kyragroupindia.com";
-    const host = location.hostname;
-
-    // If on a live production domain, never allow a localhost URL
-    if (envUrl) return envUrl;
+  if (typeof window !== 'undefined' && (window as any).CRM_BASE_URL) {
+    return String((window as any).CRM_BASE_URL);
   }
-  return (
-    import.meta.env.PUBLIC_CRM_BASE_URL || "https://crm.kyragroupindia.com"
-  );
+  return import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
 }
 
 async function submit(form: HTMLFormElement, wrap: HTMLElement) {
-  const fields = $$<Field>("input, select, textarea", form).filter(
-    (f) => rules[f.name],
-  );
+  const fields = $$<Field>('input, select, textarea', form).filter((f) => rules[f.name]);
   const firstBad = fields.filter((f) => !validateField(f))[0]; // validate all, focus the first
-  form.dataset.submitted = "1";
-  if (firstBad) {
-    firstBad.focus();
-    return;
-  }
+  form.dataset.submitted = '1';
+  if (firstBad) { firstBad.focus(); return; }
 
-  const btn = $<HTMLButtonElement>("button[type=submit]", form)!;
-  const label = $("[data-label]", btn)!;
-  const status = $("[data-status]", form)!;
+  const btn = $<HTMLButtonElement>('button[type=submit]', form)!;
+  const label = $('[data-label]', btn)!;
+  const status = $('[data-status]', form)!;
   const idle = label.textContent;
   const fd = new FormData(form);
-  const get = (k: string) => String(fd.get(k) ?? "").trim();
-  const intent = get("intent") || "site_visit";
+  const get = (k: string) => String(fd.get(k) ?? '').trim();
+  const intent = get('intent') || 'site_visit';
 
   btn.disabled = true;
-  btn.setAttribute("aria-busy", "true");
-  label.textContent = "Submitting...";
-  status.textContent = "";
+  btn.setAttribute('aria-busy', 'true');
+  label.textContent = 'Submitting...';
+  status.textContent = '';
 
-  const crmBaseUrl = getCrmBaseUrl().replace(/\/+$/, "");
+  const crmBaseUrl = getCrmBaseUrl().replace(/\/+$/, '');
   const landingLeadApi = `${crmBaseUrl}/api/leads/landing`;
 
   const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 30000);
   const geoData = (typeof window !== 'undefined' && window.__kyraGeoData) ? window.__kyraGeoData : {};
 
   const payload = {
