@@ -1,25 +1,58 @@
-// First-time daily visitor tracking for Kyra Landing Page.
-// Captures visitor IP, location, device, referrer & project info, posts to CRM,
-// and saves timestamp in localStorage so refreshes do NOT re-trigger API calls.
+// Visitor tracking for Kyra Landing Page.
+// Captures visitor IP, location, device, referrer & project info, posts to CRM.
+// Allows up to 4 tracking calls per day per visitor (counts page visits/refreshes up to 4).
 
-const TRACK_KEY = 'kyra_visitor_tracked_date';
+const TRACK_KEY = 'kyra_visitor_track_v2';
+const MAX_DAILY_VISITS = 4;
+
+declare global {
+  interface Window {
+    __kyraGeoData?: Record<string, any>;
+  }
+}
 
 function getCrmBaseUrl() {
   if (typeof window !== 'undefined') {
     if ((window as any).CRM_BASE_URL) return String((window as any).CRM_BASE_URL);
+    const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL;
     const host = location.hostname;
     const isLocalhost = host === 'localhost' || host === '127.0.0.1';
-    if (isLocalhost) {
-      const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL;
-      return (envUrl && envUrl.includes('localhost')) ? envUrl : 'http://localhost:3000';
+
+    if (!isLocalhost && envUrl && envUrl.includes('localhost')) {
+      return 'https://crm.kyragroupindia.com';
     }
-    const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL;
-    if (envUrl && !envUrl.includes('localhost')) {
-      return envUrl;
-    }
-    return 'https://crm.kyragroupindia.com';
+
+    if (envUrl) return envUrl;
   }
   return import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+}
+
+export async function getGeoLocationData(): Promise<Record<string, any>> {
+  if (typeof window !== 'undefined' && window.__kyraGeoData) {
+    return window.__kyraGeoData;
+  }
+
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+
+    const geoRes = await fetch('https://ipapi.co/json/', {
+      signal: ctrl.signal,
+    }).catch(() => null);
+
+    clearTimeout(timer);
+
+    if (geoRes && geoRes.ok) {
+      const data = await geoRes.json().catch(() => ({}));
+      if (typeof window !== 'undefined') {
+        window.__kyraGeoData = data;
+      }
+      return data;
+    }
+  } catch (err) {
+    // Silent catch if IP API is unreachable
+  }
+  return {};
 }
 
 export async function initVisitorTracking() {
@@ -29,31 +62,27 @@ export async function initVisitorTracking() {
   const visitorTrackApi = `${crmBaseUrl}/api/visitors/track`;
 
   const today = new Date().toISOString().slice(0, 10);
-  const lastTracked = localStorage.getItem(TRACK_KEY);
+  let currentCount = 0;
 
-  // If already tracked today for this visitor, skip calling API on page refresh
-  if (lastTracked === today) {
+  const storedRaw = localStorage.getItem(TRACK_KEY);
+  if (storedRaw) {
+    try {
+      const parsed = JSON.parse(storedRaw);
+      if (parsed && parsed.date === today && typeof parsed.count === 'number') {
+        currentCount = parsed.count;
+      }
+    } catch (err) {
+      // Legacy format or invalid JSON
+    }
+  }
+
+  // If already tracked 4 times today for this visitor, skip calling API
+  if (currentCount >= MAX_DAILY_VISITS) {
     return;
   }
 
-  let geoData: Record<string, any> = {};
-
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 4000);
-
-    const geoRes = await fetch('https://ipapi.co/json/', {
-      signal: ctrl.signal,
-    }).catch(() => null);
-
-    clearTimeout(timer);
-
-    if (geoRes && geoRes.ok) {
-      geoData = await geoRes.json().catch(() => ({}));
-    }
-  } catch (err) {
-    // Silent catch if IP API is blocked or offline
-  }
+  const nextCount = currentCount + 1;
+  const geoData = await getGeoLocationData();
 
   const payload = {
     ip: geoData.ip || '',
@@ -67,6 +96,7 @@ export async function initVisitorTracking() {
     referrer: document.referrer || 'Direct Visit',
     page_url: location.href.slice(0, 500),
     project_name: 'Kyra Farmlands',
+    visit_count: nextCount,
   };
 
   try {
@@ -77,11 +107,10 @@ export async function initVisitorTracking() {
     });
 
     if (res.ok) {
-      localStorage.setItem(TRACK_KEY, today);
+      localStorage.setItem(TRACK_KEY, JSON.stringify({ date: today, count: nextCount }));
     }
   } catch (err) {
     console.warn('[Visitor Tracking] Notice:', err);
-    // Store key anyway to avoid flooding broken network attempts
-    localStorage.setItem(TRACK_KEY, today);
+    localStorage.setItem(TRACK_KEY, JSON.stringify({ date: today, count: nextCount }));
   }
 }
