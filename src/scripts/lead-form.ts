@@ -78,13 +78,23 @@ function showSuccess(wrap: HTMLElement, name: string, intent: string) {
   $<HTMLElement>('[data-success-title]', ok)?.focus();
 }
 
-const CRM_BASE_URL =
-  import.meta.env.PUBLIC_CRM_BASE_URL ||
-  (typeof window !== 'undefined' && (window as any).CRM_BASE_URL) ||
-  'https://crm.kyragroupindia.com';
-
-// Manually append API path at component script level:
-const LANDING_LEAD_API = `${CRM_BASE_URL.replace(/\/+$/, '')}/api/leads/landing`;
+function getCrmBaseUrl() {
+  if (typeof window !== 'undefined') {
+    if ((window as any).CRM_BASE_URL) return String((window as any).CRM_BASE_URL);
+    const host = location.hostname;
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+    if (isLocalhost) {
+      const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL;
+      return (envUrl && envUrl.includes('localhost')) ? envUrl : 'http://localhost:3000';
+    }
+    const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL;
+    if (envUrl && !envUrl.includes('localhost')) {
+      return envUrl;
+    }
+    return 'https://crm.kyragroupindia.com';
+  }
+  return import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+}
 
 async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   const fields = $$<Field>('input, select, textarea', form).filter((f) => rules[f.name]);
@@ -104,6 +114,9 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   btn.setAttribute('aria-busy', 'true');
   label.textContent = 'Submitting...';
   status.textContent = '';
+
+  const crmBaseUrl = getCrmBaseUrl().replace(/\/+$/, '');
+  const landingLeadApi = `${crmBaseUrl}/api/leads/landing`;
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 30000);
@@ -127,7 +140,7 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   };
 
   try {
-    const res = await fetch(LANDING_LEAD_API, {
+    const res = await fetch(landingLeadApi, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal: ctrl.signal,
@@ -147,13 +160,13 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
     document.dispatchEvent(new CustomEvent('kyra:lead-success', { detail: { intent } }));
     showSuccess(wrap, get('name'), intent);
   } catch (err) {
-    console.error('[Lead Form Submission Error]', err);
+    console.error('[Lead Form Submission Error Details]', { endpoint: landingLeadApi, error: err });
     if (err instanceof ServerMessage) {
       status.textContent = err.message;
     } else if (err instanceof DOMException && err.name === 'AbortError') {
-      status.textContent = `Request timed out after 30s. Please check if CRM server at ${CRM_BASE_URL} is responding.`;
+      status.textContent = `Request timed out after 30s. Please check if CRM server at ${crmBaseUrl} is responding.`;
     } else if (err instanceof TypeError) {
-      status.textContent = `Unable to connect to CRM backend at ${CRM_BASE_URL}. Please ensure your CRM server is running.`;
+      status.textContent = `Unable to connect to CRM backend at ${crmBaseUrl}. Please ensure your CRM server is running and accessible.`;
     } else {
       status.textContent = 'Submission failed. Please check your connection or call us directly.';
     }

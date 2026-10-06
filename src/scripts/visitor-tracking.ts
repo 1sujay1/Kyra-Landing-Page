@@ -4,15 +4,29 @@
 
 const TRACK_KEY = 'kyra_visitor_tracked_date';
 
-const CRM_BASE_URL =
-  import.meta.env.PUBLIC_CRM_BASE_URL ||
-  (typeof window !== 'undefined' && (window as any).CRM_BASE_URL) ||
-  'https://crm.kyragroupindia.com';
-
-const VISITOR_TRACK_API = `${CRM_BASE_URL.replace(/\/+$/, '')}/api/visitors/track`;
+function getCrmBaseUrl() {
+  if (typeof window !== 'undefined') {
+    if ((window as any).CRM_BASE_URL) return String((window as any).CRM_BASE_URL);
+    const host = location.hostname;
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+    if (isLocalhost) {
+      const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL;
+      return (envUrl && envUrl.includes('localhost')) ? envUrl : 'http://localhost:3000';
+    }
+    const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL;
+    if (envUrl && !envUrl.includes('localhost')) {
+      return envUrl;
+    }
+    return 'https://crm.kyragroupindia.com';
+  }
+  return import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+}
 
 export async function initVisitorTracking() {
   if (typeof window === 'undefined') return;
+
+  const crmBaseUrl = getCrmBaseUrl().replace(/\/+$/, '');
+  const visitorTrackApi = `${crmBaseUrl}/api/visitors/track`;
 
   const today = new Date().toISOString().slice(0, 10);
   const lastTracked = localStorage.getItem(TRACK_KEY);
@@ -56,7 +70,7 @@ export async function initVisitorTracking() {
   };
 
   try {
-    const res = await fetch(VISITOR_TRACK_API, {
+    const res = await fetch(visitorTrackApi, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
