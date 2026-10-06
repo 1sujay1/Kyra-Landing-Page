@@ -166,7 +166,12 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
     try {
       res = await fetch(landingLeadApi, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        mode: 'cors',
+        credentials: 'omit',
         signal: ctrl.signal,
         body: JSON.stringify(payload),
       });
@@ -177,7 +182,12 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
       try {
         res = await fetch(landingLeadApi, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          mode: 'cors',
+          credentials: 'omit',
           signal: retryCtrl.signal,
           body: JSON.stringify(payload),
         });
