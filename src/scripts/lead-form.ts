@@ -93,11 +93,19 @@ function showSuccess(wrap: HTMLElement, name: string, intent: string) {
   $<HTMLElement>("[data-success-title]", ok)?.focus();
 }
 
-function getCrmBaseUrl() {
+function getCrmBaseUrl(): string {
   if (typeof window !== 'undefined' && (window as any).CRM_BASE_URL) {
     return String((window as any).CRM_BASE_URL);
   }
-  return import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+  const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+  if (typeof window !== 'undefined') {
+    const host = location.hostname;
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+    if (!isLocalhost && envUrl.includes('localhost')) {
+      return 'https://crm.kyragroupindia.com';
+    }
+  }
+  return envUrl;
 }
 
 async function submit(form: HTMLFormElement, wrap: HTMLElement) {
@@ -148,51 +156,65 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
     country: geoData.country_name || 'India',
   };
 
+  let res: Response | undefined;
   try {
-    const res = await fetch(landingLeadApi, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    res = await fetch(landingLeadApi, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       signal: ctrl.signal,
       body: JSON.stringify(payload),
     });
+  } catch (firstErr) {
+    console.warn('[Lead Form] First attempt network notice, retrying...', firstErr);
+    const retryCtrl = new AbortController();
+    const retryTimer = setTimeout(() => retryCtrl.abort(), 15000);
+    try {
+      res = await fetch(landingLeadApi, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: retryCtrl.signal,
+        body: JSON.stringify(payload),
+      });
+    } catch (secondErr) {
+      console.error('[Lead Form] Retry fetch failed:', secondErr);
+      throw secondErr;
+    } finally {
+      clearTimeout(retryTimer);
+    }
+  }
+
+  try {
+    if (!res) {
+      throw new ServerMessage(`Unable to connect to CRM backend at ${crmBaseUrl}. Please check your connection.`);
+    }
 
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.success === false || data.ok === false) {
-      throw new ServerMessage(
-        data.message ||
-          data.error ||
-          `Server responded with status ${res.status}. Please try again.`,
-      );
+      throw new ServerMessage(data.message || data.error || `Server responded with status ${res.status}. Please try again.`);
     }
 
-    if (consentStatus() === "pending") setConsent(true, true, "lead_form");
+    if (consentStatus() === 'pending') setConsent(true, true, 'lead_form');
     if (data.leadId && data.eventId) fireLeadConversion(data.eventId, intent);
 
-    store.set("kyra_lead_submitted", "1");
-    document.dispatchEvent(
-      new CustomEvent("kyra:lead-success", { detail: { intent } }),
-    );
-    showSuccess(wrap, get("name"), intent);
+    store.set('kyra_lead_submitted', '1');
+    document.dispatchEvent(new CustomEvent('kyra:lead-success', { detail: { intent } }));
+    showSuccess(wrap, get('name'), intent);
   } catch (err) {
-    console.error("[Lead Form Submission Error Details]", {
-      endpoint: landingLeadApi,
-      error: err,
-    });
+    console.error('[Lead Form Submission Error Details]', { endpoint: landingLeadApi, error: err });
     if (err instanceof ServerMessage) {
       status.textContent = err.message;
-    } else if (err instanceof DOMException && err.name === "AbortError") {
-      status.textContent = `Request timed out after 30s. Please check if CRM server at ${crmBaseUrl} is responding.`;
+    } else if (err instanceof DOMException && err.name === 'AbortError') {
+      status.textContent = `Request timed out. Please check if CRM server is responding.`;
     } else if (err instanceof TypeError) {
-      status.textContent = `Unable to connect to CRM backend at ${crmBaseUrl}. Please ensure your CRM server is running and accessible.`;
+      status.textContent = `Unable to connect to CRM backend at ${crmBaseUrl}. Please check your connection or call us directly.`;
     } else {
-      status.textContent =
-        "Submission failed. Please check your connection or call us directly.";
+      status.textContent = 'Submission failed. Please check your connection or call us directly.';
     }
   } finally {
     clearTimeout(timer);
     btn.disabled = false;
-    btn.removeAttribute("aria-busy");
+    btn.removeAttribute('aria-busy');
     label.textContent = idle;
   }
 }

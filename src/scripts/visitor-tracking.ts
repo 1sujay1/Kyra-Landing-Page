@@ -10,11 +10,19 @@ declare global {
   }
 }
 
-function getCrmBaseUrl() {
+function getCrmBaseUrl(): string {
   if (typeof window !== 'undefined' && (window as any).CRM_BASE_URL) {
     return String((window as any).CRM_BASE_URL);
   }
-  return import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+  const envUrl = import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+  if (typeof window !== 'undefined') {
+    const host = location.hostname;
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+    if (!isLocalhost && envUrl.includes('localhost')) {
+      return 'https://crm.kyragroupindia.com';
+    }
+  }
+  return envUrl;
 }
 
 function getDeviceCategory(): 'mobile' | 'tablet' | 'desktop' {
