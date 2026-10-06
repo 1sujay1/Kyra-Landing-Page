@@ -1,12 +1,11 @@
 // Lead forms: validation, bot checks, submission and success state.
 // Conversions fire ONLY after the server confirms the lead (ok + leadId).
 
-import { $, $$, getCookie, store } from './lib';
-import { ids, attribution, track } from './tracking';
+import { $, $$, store } from './lib';
+import { track } from './tracking';
 import { consentStatus, setConsent } from './consent';
 import { fireLeadConversion } from './analytics';
 
-const pageLoadedAt = Date.now();
 export const formState = { active: false }; // true while a visitor is typing in any form
 
 /** A user-safe message returned by the server (validation, rate limit). */
@@ -100,7 +99,6 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   const fd = new FormData(form);
   const get = (k: string) => String(fd.get(k) ?? '').trim();
   const intent = get('intent') || 'site_visit';
-  const startedAt = Number(form.dataset.startedAt) || pageLoadedAt;
 
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');

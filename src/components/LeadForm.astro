@@ -1,7 +1,7 @@
 ---
 // One lead form, reused by the hero card, the popup and the contact section.
 import Icon from './Icon.astro';
-import { budgets, consentText, site, whatsappLink } from '../content/site';
+import { budgets, site, whatsappLink } from '../content/site';
 
 interface Props {
   id: string; // unique prefix for field ids
@@ -12,7 +12,6 @@ interface Props {
 }
 const { id, intent = 'site_visit', submitLabel = 'Book my site visit', withMessage = false, dense = false } = Astro.props;
 const f = (name: string) => `${id}-${name}`;
-const [before, after] = consentText.split('Privacy Policy');
 ---
 <div data-lead-wrap>
   <form data-lead-form data-form={id} novalidate class:list={['grid', dense ? 'gap-3' : 'gap-4']} action="#" method="post">
