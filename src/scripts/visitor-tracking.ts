@@ -1,8 +1,7 @@
 // Visitor tracking for Kyra Landing Page.
 // Captures visitor IP, location, device, referrer & project info, posts to CRM.
-// Allows up to 4 tracking calls per day per visitor (counts page visits/refreshes up to 4).
+// Tracks up to 4 visits/refreshes per day independently for each device category (mobile, tablet, desktop).
 
-const TRACK_KEY = 'kyra_visitor_track_v2';
 const MAX_DAILY_VISITS = 4;
 
 declare global {
@@ -16,6 +15,20 @@ function getCrmBaseUrl() {
     return String((window as any).CRM_BASE_URL);
   }
   return import.meta.env.PUBLIC_CRM_BASE_URL || 'https://crm.kyragroupindia.com';
+}
+
+function getDeviceCategory(): 'mobile' | 'tablet' | 'desktop' {
+  if (typeof window === 'undefined') return 'desktop';
+  const ua = (navigator.userAgent || '').toLowerCase();
+  const width = window.innerWidth || document.documentElement.clientWidth || screen.width || 1024;
+
+  if (/ipad|tablet|(android(?!.*mobile))/i.test(ua) || (width >= 600 && width <= 1024 && 'ontouchstart' in window)) {
+    return 'tablet';
+  }
+  if (/mobile|iphone|ipod|android|blackberry|opera mini|iemobile/i.test(ua) || width < 600) {
+    return 'mobile';
+  }
+  return 'desktop';
 }
 
 export async function getGeoLocationData(): Promise<Record<string, any>> {
@@ -49,31 +62,50 @@ export async function getGeoLocationData(): Promise<Record<string, any>> {
 export async function initVisitorTracking() {
   if (typeof window === 'undefined') return;
 
-  const crmBaseUrl = getCrmBaseUrl().replace(/\/+$/, '');
-  const visitorTrackApi = `${crmBaseUrl}/api/visitors/track`;
-
+  const deviceCategory = getDeviceCategory();
+  const trackKey = `kyra_visitor_track_${deviceCategory}`;
   const today = new Date().toISOString().slice(0, 10);
   let currentCount = 0;
 
-  const storedRaw = localStorage.getItem(TRACK_KEY);
+  const storedRaw = localStorage.getItem(trackKey);
   if (storedRaw) {
     try {
       const parsed = JSON.parse(storedRaw);
+      // If stored date is NOT today, clear localstorage and set fields freshly
       if (parsed && parsed.date === today && typeof parsed.count === 'number') {
         currentCount = parsed.count;
+      } else {
+        localStorage.removeItem(trackKey);
+        currentCount = 0;
       }
     } catch (err) {
-      // Legacy format or invalid JSON
+      localStorage.removeItem(trackKey);
+      currentCount = 0;
     }
   }
 
-  // If already tracked 4 times today for this visitor, skip calling API
+  // Clean up legacy single-device key if outdated
+  const legacyRaw = localStorage.getItem('kyra_visitor_track_v2');
+  if (legacyRaw) {
+    try {
+      const legacyParsed = JSON.parse(legacyRaw);
+      if (legacyParsed && legacyParsed.date !== today) {
+        localStorage.removeItem('kyra_visitor_track_v2');
+      }
+    } catch (e) {
+      localStorage.removeItem('kyra_visitor_track_v2');
+    }
+  }
+
+  // If this device has already reached 4 calls today, skip calling API
   if (currentCount >= MAX_DAILY_VISITS) {
     return;
   }
 
   const nextCount = currentCount + 1;
   const geoData = await getGeoLocationData();
+  const crmBaseUrl = getCrmBaseUrl().replace(/\/+$/, '');
+  const visitorTrackApi = `${crmBaseUrl}/api/visitors/track`;
 
   const payload = {
     ip: geoData.ip || '',
@@ -90,6 +122,7 @@ export async function initVisitorTracking() {
     visit_count: nextCount,
   };
 
+  // Call API BEFORE updating localStorage for this device
   try {
     const res = await fetch(visitorTrackApi, {
       method: 'POST',
@@ -98,10 +131,10 @@ export async function initVisitorTracking() {
     });
 
     if (res.ok) {
-      localStorage.setItem(TRACK_KEY, JSON.stringify({ date: today, count: nextCount }));
+      localStorage.setItem(trackKey, JSON.stringify({ date: today, count: nextCount }));
     }
   } catch (err) {
     console.warn('[Visitor Tracking] Notice:', err);
-    localStorage.setItem(TRACK_KEY, JSON.stringify({ date: today, count: nextCount }));
+    localStorage.setItem(trackKey, JSON.stringify({ date: today, count: nextCount }));
   }
 }
