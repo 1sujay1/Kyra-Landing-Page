@@ -109,10 +109,18 @@ function getCrmBaseUrl(): string {
 }
 
 async function submit(form: HTMLFormElement, wrap: HTMLElement) {
+  console.log('🚀 [Submit Step 1] Lead form submit handler triggered.', { formId: form.dataset.form, wrap });
+
   const fields = $$<Field>('input, select, textarea', form).filter((f) => rules[f.name]);
   const firstBad = fields.filter((f) => !validateField(f))[0]; // validate all, focus the first
   form.dataset.submitted = '1';
-  if (firstBad) { firstBad.focus(); return; }
+
+  if (firstBad) {
+    console.warn('⚠️ [Submit Step 2] Validation failed on field:', firstBad.name);
+    firstBad.focus();
+    return;
+  }
+  console.log('✅ [Submit Step 2] Form validation passed for all fields.');
 
   const btn = $<HTMLButtonElement>('button[type=submit]', form)!;
   const label = $('[data-label]', btn)!;
@@ -122,6 +130,7 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   const get = (k: string) => String(fd.get(k) ?? '').trim();
   const intent = get('intent') || 'site_visit';
 
+  console.log('⚙️ [Submit Step 3] Setting button to disabled & Submitting...');
   if (btn) {
     btn.disabled = true;
     btn.setAttribute('aria-busy', 'true');
@@ -132,8 +141,13 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   const crmBaseUrl = getCrmBaseUrl().replace(/\/+$/, '');
   const landingLeadApi = `${crmBaseUrl}/api/leads/landing`;
 
+  console.log('🌐 [Submit Step 4] Target CRM Endpoint:', { crmBaseUrl, landingLeadApi, hostname: typeof location !== 'undefined' ? location.hostname : '' });
+
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 30000);
+  const timer = setTimeout(() => {
+    console.warn('⏰ [Submit Timeout] 30s abort controller timer fired.');
+    ctrl.abort();
+  }, 30000);
 
   try {
     const geoData = (typeof window !== 'undefined' && window.__kyraGeoData) ? window.__kyraGeoData : {};
@@ -153,17 +167,18 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
       message: get('message') || '',
       intent,
       visit_date: get('visit_date') || null,
-      page_url: location.href.slice(0, 500),
+      page_url: typeof location !== 'undefined' ? location.href.slice(0, 500) : '',
       ip: geoData.ip || '',
       city: geoData.city || 'Coimbatore',
       region: geoData.region || 'Tamil Nadu',
       country: geoData.country_name || 'India',
     };
 
-    console.log('[Lead Form] Initiating API request to:', landingLeadApi, payload);
+    console.log('📦 [Submit Step 5] Sending JSON payload:', payload);
 
     let res: Response;
     try {
+      console.log('📡 [Submit Step 6] Executing primary fetch call to:', landingLeadApi);
       res = await fetch(landingLeadApi, {
         method: 'POST',
         headers: {
@@ -175,10 +190,14 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
         signal: ctrl.signal,
         body: JSON.stringify(payload),
       });
+      console.log('✅ [Submit Step 7] Primary fetch response received:', { status: res.status, ok: res.ok, statusText: res.statusText });
     } catch (firstErr) {
-      console.warn('[Lead Form] Primary fetch notice, executing retry...', firstErr);
+      console.warn('⚠️ [Submit Step 7-Retry] Primary fetch caught error, executing 15s retry fetch:', firstErr);
       const retryCtrl = new AbortController();
-      const retryTimer = setTimeout(() => retryCtrl.abort(), 15000);
+      const retryTimer = setTimeout(() => {
+        console.warn('⏰ [Submit Retry Timeout] 15s retry timer fired.');
+        retryCtrl.abort();
+      }, 15000);
       try {
         res = await fetch(landingLeadApi, {
           method: 'POST',
@@ -191,18 +210,29 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
           signal: retryCtrl.signal,
           body: JSON.stringify(payload),
         });
+        console.log('✅ [Submit Step 7-Retry] Retry fetch response received:', { status: res.status, ok: res.ok, statusText: res.statusText });
+      } catch (secondErr) {
+        console.error('❌ [Submit Step 7-Retry] Retry fetch also failed with error:', secondErr);
+        throw secondErr;
       } finally {
         clearTimeout(retryTimer);
       }
     }
 
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json().catch((jsonErr) => {
+      console.warn('⚠️ [Submit Step 8] Failed to parse response body as JSON:', jsonErr);
+      return {};
+    });
+
+    console.log('📄 [Submit Step 8] Response data JSON parsed:', data);
 
     if (!res.ok || data.success === false || data.ok === false) {
-      throw new ServerMessage(data.message || data.error || `Server responded with status ${res.status}. Please try again.`);
+      const msg = data.message || data.error || `Server responded with status ${res.status}. Please try again.`;
+      console.error('❌ [Submit Step 9 ERROR] Server rejected lead submission:', msg);
+      throw new ServerMessage(msg);
     }
 
-    console.log('[Lead Form SUCCESS]', { status: res.status, data });
+    console.log('🎉 [Submit Step 9 SUCCESS] Lead successfully confirmed by CRM backend!', { status: res.status, data });
 
     if (consentStatus() === 'pending') setConsent(true, true, 'lead_form');
     if (data.leadId && data.eventId) fireLeadConversion(data.eventId, intent);
@@ -211,7 +241,13 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
     document.dispatchEvent(new CustomEvent('kyra:lead-success', { detail: { intent } }));
     showSuccess(wrap, get('name'), intent);
   } catch (err) {
-    console.error('[Lead Form FAILURE]', { endpoint: landingLeadApi, error: err });
+    console.error('💥 [Submit Step CATCH] Exception caught in submit handler:', {
+      endpoint: landingLeadApi,
+      error: err,
+      name: (err as any)?.name,
+      message: (err as any)?.message,
+      stack: (err as any)?.stack,
+    });
     if (status) {
       if (err instanceof ServerMessage) {
         status.textContent = err.message;
@@ -224,6 +260,7 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
       }
     }
   } finally {
+    console.log('🏁 [Submit Step FINALLY] Restoring submit button state & clearing timer.');
     clearTimeout(timer);
     if (btn) {
       btn.disabled = false;
