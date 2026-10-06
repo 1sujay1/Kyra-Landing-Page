@@ -44,6 +44,37 @@ export async function getGeoLocationData(): Promise<Record<string, any>> {
     return window.__kyraGeoData;
   }
 
+  // 1. Primary: ipwho.is (fast, high reliability, no rate-limiting issues)
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3500);
+
+    const geoRes = await fetch('https://ipwho.is/', {
+      signal: ctrl.signal,
+    }).catch(() => null);
+
+    clearTimeout(timer);
+
+    if (geoRes && geoRes.ok) {
+      const data = await geoRes.json().catch(() => ({}));
+      if (data && data.success !== false && data.city) {
+        const normalized = {
+          ip: data.ip || '',
+          city: data.city || '',
+          region: data.region || '',
+          country_name: data.country || '',
+          postal: data.postal || '',
+          org: data.connection?.org || data.connection?.isp || '',
+        };
+        if (typeof window !== 'undefined') {
+          window.__kyraGeoData = normalized;
+        }
+        return normalized;
+      }
+    }
+  } catch (err) {}
+
+  // 2. Secondary Fallback: ipapi.co
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 3000);
@@ -56,14 +87,15 @@ export async function getGeoLocationData(): Promise<Record<string, any>> {
 
     if (geoRes && geoRes.ok) {
       const data = await geoRes.json().catch(() => ({}));
-      if (typeof window !== 'undefined') {
-        window.__kyraGeoData = data;
+      if (data && !data.error && data.city) {
+        if (typeof window !== 'undefined') {
+          window.__kyraGeoData = data;
+        }
+        return data;
       }
-      return data;
     }
-  } catch (err) {
-    // Silent catch if IP API is unreachable
-  }
+  } catch (err) {}
+
   return {};
 }
 
