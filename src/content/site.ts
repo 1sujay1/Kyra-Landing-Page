@@ -110,3 +110,12 @@ export const nav = [
 
 export const whatsappLink = (text = site.whatsappText) =>
   `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(text)}`;
+
+// Social profiles, used by the footer and the right-edge social rail.
+export const socialLinks = [
+  { name: 'whatsapp', label: 'WhatsApp', href: whatsappLink() },
+  { name: 'instagram', label: 'Instagram', href: site.socials.instagram },
+  { name: 'facebook', label: 'Facebook', href: site.socials.facebook },
+  { name: 'youtube', label: 'YouTube', href: site.socials.youtube },
+  { name: 'linkedin', label: 'LinkedIn', href: site.socials.linkedin },
+] as const;

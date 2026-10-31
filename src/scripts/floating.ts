@@ -16,6 +16,7 @@ export function initFloating() {
     const anyOpen = openDialogs() > 0;
     bar?.toggleAttribute('data-hidden', anyOpen);
     $('#floating-wa')?.toggleAttribute('data-hidden', anyOpen);
+    $('#social-rail')?.toggleAttribute('data-hidden', anyOpen);
   });
 }
 

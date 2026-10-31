@@ -1,0 +1,94 @@
+---
+import Icon from './Icon.astro';
+import { socialLinks } from '../content/site';
+---
+<!-- Social links pinned to the right edge, vertically centred. Slide in on load, label slides out on hover. -->
+<nav id="social-rail" aria-label="Kyra Group on social media" class="social-rail">
+  <ul>
+    {socialLinks.map((s, i) => (
+      <li style={`--i:${i}`}>
+        <a href={s.href} target="_blank" rel="noopener" aria-label={s.label} data-track="social_rail" class={`rail-link rail-${s.name}`}>
+          <span class="rail-label" aria-hidden="true">{s.label}</span>
+          <span class="rail-icon"><Icon name={s.name} size={20} /></span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .social-rail {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    z-index: 30;
+    transform: translateY(-50%);
+  }
+  .social-rail[data-hidden] { display: none; }
+  ul { display: grid; gap: 6px; }
+  li { display: flex; justify-content: flex-end; }
+
+  .rail-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 12px 0 0 12px;
+    background: var(--c);
+    color: #fff;
+    box-shadow: 0 8px 22px -10px rgb(0 0 0 / .55);
+    transition: box-shadow .3s;
+  }
+  .rail-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    transition: transform .35s var(--ease-out);
+  }
+  .rail-label {
+    max-width: 0;
+    overflow: hidden;
+    font-size: .85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    transition: max-width .35s var(--ease-out), opacity .25s, padding .35s var(--ease-out);
+  }
+  .rail-link:focus-visible { outline: 2px solid var(--brand-secondary); outline-offset: 2px; }
+  .rail-link:focus-visible .rail-label { max-width: 9rem; padding-left: 14px; opacity: 1; }
+  @media (hover: hover) {
+    .rail-link:hover { box-shadow: 0 12px 28px -10px rgb(0 0 0 / .6); }
+    .rail-link:hover .rail-label { max-width: 9rem; padding-left: 14px; opacity: 1; }
+    .rail-link:hover .rail-icon { transform: scale(1.12) rotate(-8deg); }
+  }
+
+  .rail-whatsapp { --c: #25d366; }
+  .rail-instagram { --c: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
+  .rail-facebook { --c: #1877f2; }
+  .rail-youtube { --c: #ff0000; }
+  .rail-linkedin { --c: #0a66c2; }
+
+  @media (max-width: 767px) {
+    ul { gap: 4px; }
+    .rail-icon { width: 38px; height: 38px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Staggered slide-in after the hero has appeared */
+    li { animation: rail-in .6s var(--ease-out) calc(.9s + var(--i) * .09s) both; }
+    /* Soft light sweep across each tab every few seconds */
+    .rail-link::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .45) 50%, transparent 65%);
+      transform: translateX(-120%);
+      animation: rail-shine 6s ease-in-out calc(2.2s + var(--i) * .15s) infinite;
+      pointer-events: none;
+    }
+  }
+  @keyframes rail-in { from { opacity: 0; transform: translateX(110%); } to { opacity: 1; transform: none; } }
+  @keyframes rail-shine { 0% { transform: translateX(-120%); } 14%, 100% { transform: translateX(120%); } }
+</style>

@@ -1,15 +1,10 @@
 ---
 import Logo from './Logo.astro';
 import Icon from './Icon.astro';
-import { nav, site, whatsappLink } from '../content/site';
+import { nav, site, socialLinks, whatsappLink } from '../content/site';
 
 const year = new Date().getFullYear();
-const socials = [
-  { name: 'facebook', label: 'Facebook', href: site.socials.facebook },
-  { name: 'instagram', label: 'Instagram', href: site.socials.instagram },
-  { name: 'youtube', label: 'YouTube', href: site.socials.youtube },
-  { name: 'linkedin', label: 'LinkedIn', href: site.socials.linkedin },
-] as const;
+const socials = socialLinks.filter((s) => s.name !== 'whatsapp');
 const legalLinks = [
   { key: 'privacy', label: 'Privacy Policy' },
   { key: 'disclaimer', label: 'Disclaimer' },
