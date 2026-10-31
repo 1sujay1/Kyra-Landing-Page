@@ -14,12 +14,9 @@ export const site = {
   locale: 'en_IN',
 
   // Contact — [VERIFY] all of these with the client
-  phoneDisplay: '+91 90872 66613',
-  phone: '+919087266613',
-  whatsapp: '919087266613', // digits only, with country code
-  // "Talk to Us" phone from the client's change request. [VERIFY] the rest of the site uses 66613.
-  officePhoneDisplay: '+91 90872 66653',
-  officePhone: '+919087266653',
+  phoneDisplay: '+91 90872 66653',
+  phone: '+919087266653',
+  whatsapp: '919087266653', // digits only, with country code
   whatsappText: 'Hi, I am interested in farms near Coimbatore',
   email: 'admin@kyragroupindia.com',
   address: {

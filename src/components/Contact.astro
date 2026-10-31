@@ -6,7 +6,7 @@ import { site, whatsappLink } from '../content/site';
 const a = site.address;
 const details = [
   { icon: 'map-pin', label: 'Office', value: `${a.street}, ${a.locality}, ${a.city}, ${a.region} ${a.postalCode}`, href: site.directionsUrl, cta: 'Get directions', ext: true },
-  { icon: 'phone', label: 'Phone', value: site.officePhoneDisplay, href: `tel:${site.officePhone}`, cta: 'Call now' },
+  { icon: 'phone', label: 'Phone', value: site.phoneDisplay, href: `tel:${site.phone}`, cta: 'Call now' },
   { icon: 'whatsapp', label: 'WhatsApp', value: site.phoneDisplay, href: whatsappLink(), cta: 'Chat on WhatsApp', ext: true },
   { icon: 'mail', label: 'Email', value: site.email, href: `mailto:${site.email}`, cta: 'Send an email' },
   { icon: 'clock', label: 'Working hours', value: site.hours },
