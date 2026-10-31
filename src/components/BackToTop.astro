@@ -1,0 +1,8 @@
+---
+import Icon from './Icon.astro';
+---
+<!-- WhatsApp lives in the social rail (and the phone bottom bar), so this corner only has back-to-top. -->
+<button id="back-to-top" type="button" aria-label="Back to top"
+  class="fixed right-5 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 grid size-12 translate-y-4 place-items-center rounded-full bg-white text-brand opacity-0 shadow-lg ring-1 ring-black/5 transition-[opacity,transform] pointer-events-none md:right-6 md:bottom-6 data-[show]:pointer-events-auto data-[show]:translate-y-0 data-[show]:opacity-100">
+  <Icon name="arrow-up" size={22} />
+</button>
