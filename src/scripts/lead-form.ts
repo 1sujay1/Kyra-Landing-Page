@@ -84,7 +84,7 @@ function showSuccess(wrap: HTMLElement, name: string, intent: string) {
     const u = new URL(wa.href);
     u.searchParams.set(
       "text",
-      `Hi, I am ${name}. I just enquired about farmland plots near Coimbatore.`,
+      `Hi, I am ${name}. I just enquired about farms near Coimbatore.`,
     );
     wa.href = u.toString();
   }
@@ -125,7 +125,7 @@ async function submit(form: HTMLFormElement, wrap: HTMLElement) {
   const btn = $<HTMLButtonElement>('button[type=submit]', form)!;
   const label = $('[data-label]', btn)!;
   const status = $('[data-status]', form)!;
-  const idle = label?.textContent || 'Book my site visit';
+  const idle = label?.textContent || 'Schedule my farm visit';
   const fd = new FormData(form);
   const get = (k: string) => String(fd.get(k) ?? '').trim();
   const intent = get('intent') || 'site_visit';

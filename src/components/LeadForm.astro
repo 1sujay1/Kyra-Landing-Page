@@ -10,7 +10,7 @@ interface Props {
   withMessage?: boolean;
   dense?: boolean;
 }
-const { id, intent = 'site_visit', submitLabel = 'Book my site visit', withMessage = false, dense = false } = Astro.props;
+const { id, intent = 'site_visit', submitLabel = 'Schedule my farm visit', withMessage = false, dense = false } = Astro.props;
 const f = (name: string) => `${id}-${name}`;
 ---
 <div data-lead-wrap>
@@ -60,7 +60,7 @@ const f = (name: string) => `${id}-${name}`;
       <div class="field">
         <label for={f('message')}>Message <span class="font-normal text-ink-muted">(optional)</span></label>
         <textarea id={f('message')} name="message" rows="3" maxlength="1000" class="input resize-y"
-          aria-describedby={f('message-err')} placeholder="Plot size, preferred location, questions…"></textarea>
+          aria-describedby={f('message-err')} placeholder="Farm size, preferred location, questions…"></textarea>
         <p id={f('message-err')} class="field-error" aria-live="polite"></p>
       </div>
     )}
@@ -86,7 +86,8 @@ const f = (name: string) => `${id}-${name}`;
       Our team will call you within 30 minutes during working hours ({site.hours.toLowerCase()}).
     </p>
     <div class="grid gap-3">
-      <a data-brochure hidden href={site.brochureUrl} class="btn btn-green" download>
+      <!-- Brochure PDF not uploaded yet: rename data-brochure-pending back to data-brochure once public/brochure/ has it. -->
+      <a data-brochure-pending hidden href={site.brochureUrl} class="btn btn-green" download>
         <Icon name="download" size={18} /> Download the brochure
       </a>
       <a data-success-wa href={whatsappLink()} target="_blank" rel="noopener" class="btn btn-wa" data-track="lead_success">

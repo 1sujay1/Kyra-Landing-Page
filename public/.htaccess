@@ -1,6 +1,6 @@
 # ════════════════════════════════════════════════════════════════════════════
 # Kyra Group landing page — Hostinger (LiteSpeed / Apache)
-# [VERIFY] canonical host below: currently non-www https://kyragroupindia.com
+# Served at https://farmland.kyragroupindia.com (www and http redirect to it)
 # ════════════════════════════════════════════════════════════════════════════
 
 Options -Indexes -MultiViews
@@ -22,9 +22,12 @@ AddDefaultCharset utf-8
   # Let's Encrypt / Hostinger SSL validation must keep working over http
   RewriteCond %{REQUEST_URI} !^/\.well-known/
 
-  RewriteCond %{HTTPS} off [OR]
-  RewriteCond %{HTTP_HOST} ^www\. [NC]
-  RewriteRule ^ https://kyragroupindia.com%{REQUEST_URI} [L,R=301,NE]
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301,NE]
+
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE]
 
   # Hidden files and folders (.git, .env, …) → 404. .well-known stays reachable.
   RewriteRule (^|/)\.(?!well-known/) - [R=404,L]

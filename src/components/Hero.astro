@@ -2,7 +2,7 @@
 import { Picture } from 'astro:assets';
 import LeadForm from './LeadForm.astro';
 import Icon from './Icon.astro';
-import { trust } from '../content/site';
+import { heroLocation, trust } from '../content/site';
 import hero from '../assets/images/hero.jpg'; // [REPLACE] real hero photo (≥1920px wide, landscape)
 ---
 <section id="home" aria-labelledby="hero-title" class="relative isolate flex min-h-[100svh] items-center overflow-hidden text-white">
@@ -29,37 +29,37 @@ import hero from '../assets/images/hero.jpg'; // [REPLACE] real hero photo (≥1
 
   <div class="container-x grid items-center gap-10 pt-[calc(var(--header-h)+2.5rem)] pb-16 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14 lg:pb-20">
     <div class="hero-rise on-dark max-w-2xl">
-      <p class="tamil mb-4 text-[1.05rem] leading-relaxed text-gold sm:text-lg" lang="ta">
-        கோயம்புத்தூர் அருகே உங்கள் சொந்த பண்ணை நிலம்
-      </p>
-      <h1 id="hero-title" class="mb-5">
-        Own farmland near Coimbatore, close to the city, surrounded by green hills
+      <h1 id="hero-title" class="mb-6 grid gap-2.5">
+        <span class="font-sans text-[clamp(1.05rem,1.5vw,1.3rem)] leading-snug font-semibold tracking-[0.01em] text-gold">
+          Own a piece of nature farm, close to Coimbatore
+        </span>
+        <span class="tamil text-[clamp(1.85rem,4.4vw,3.5rem)] leading-[1.3] text-white" lang="ta">
+          கோவைக்கு அருகில் உங்கள் சொந்த பண்ணை நிலம்
+        </span>
       </h1>
-      <p class="measure mb-8 text-lg text-white/90 sm:text-xl">
-        Clear-title farmland plots near Pollachi with road access, water source and fencing. Visit the site this weekend with free pickup.
-      </p>
+      <ul class="mb-8 grid gap-2 text-[clamp(0.98rem,1.2vw,1.08rem)] text-white/90" aria-label="Location">
+        {heroLocation.map((l) => (
+          <li class="flex items-start gap-2.5"><Icon name="map-pin" size={18} class="mt-0.5 shrink-0 text-gold" />{l}</li>
+        ))}
+      </ul>
       <div class="flex flex-col gap-3 xs:flex-row">
         <button type="button" class="btn btn-gold text-[1.05rem]" data-open-lead data-intent="site_visit" data-track="hero">
-          Book a free site visit <Icon name="arrow-right" size={18} />
+          Plan your farm visit <Icon name="arrow-right" size={18} />
         </button>
         <button type="button" class="btn btn-ghost-light text-[1.05rem]" data-open-lead data-intent="price" data-track="hero">
           Get price details
         </button>
       </div>
-      <ul class="mt-9 flex flex-wrap gap-x-6 gap-y-3 border-t border-white/20 pt-6 text-sm sm:text-[0.95rem]" aria-label="Why Kyra Group">
-        {trust.map((t) => (
-          <li class="flex items-center gap-2">
-            <span class="grid size-6 place-items-center rounded-full bg-gold/20 text-gold"><Icon name="check" size={14} /></span>
-            <span><strong class="font-bold text-white">{t.value}</strong> <span class="text-white/80">{t.label}</span></span>
-          </li>
-        ))}
-      </ul>
+      <div class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-white/20 pt-5 text-[0.95rem] text-white/85">
+        <p>A new vision, backed by <strong class="font-bold text-white">{trust.years}</strong> of experience</p>
+        <p class="rounded-full border border-gold/55 bg-gold/15 px-3.5 py-1"><strong class="font-bold text-white">{trust.customers}</strong> happy customers</p>
+      </div>
     </div>
 
     <!-- Desktop: inline short lead form. Mobile uses the popup instead. -->
     <div class="card hidden p-7 text-ink lg:block xl:p-8" style="animation: rise .9s .35s var(--ease-out) both">
-      <h2 class="mb-1 !text-[1.75rem]">Book a free site visit</h2>
-      <p class="mb-5 text-[0.95rem] text-ink-muted">Free pickup from Coimbatore. We call you back within 30 minutes.</p>
+      <h2 class="mb-1 !text-[1.75rem]">Plan your farm visit</h2>
+      <p class="mb-5 text-[0.95rem] text-ink-muted">Complimentary pick-up from our office. Our team will connect with you shortly.</p>
       <LeadForm id="hero" dense />
     </div>
   </div>

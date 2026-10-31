@@ -9,18 +9,18 @@ export type Intent = 'site_visit' | 'price' | 'brochure' | 'callback';
 
 const copy: Record<Intent, { title: string; sub: string; cta: string }> = {
   site_visit: {
-    title: 'Book a free site visit',
-    sub: 'Free pickup from Coimbatore. Pick a date and we will confirm the slot by phone.',
-    cta: 'Book my site visit',
+    title: 'Plan your farm visit',
+    sub: 'Complimentary pick-up from our office. Our team will connect with you shortly.',
+    cta: 'Schedule my farm visit',
   },
   price: {
     title: 'Get price details',
-    sub: 'Share your number and we will send the latest price list and available plots.',
+    sub: 'Share your number and we will send the latest price list and available farms.',
     cta: 'Send me the prices',
   },
   brochure: {
     title: 'Download the brochure',
-    sub: 'Get the project brochure with plot layout, photos and location map.',
+    sub: 'Get the project brochure with farm layout, photos and location map.',
     cta: 'Get the brochure',
   },
   callback: {

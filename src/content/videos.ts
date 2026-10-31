@@ -5,7 +5,7 @@
 
 export const videos = [
   { youtubeId: 'REPLACE_ID_1', title: 'Project walkthrough' },
-  { youtubeId: 'REPLACE_ID_2', title: 'Customer site visit' },
+  { youtubeId: 'REPLACE_ID_2', title: 'Customer farm visit' },
   { youtubeId: 'REPLACE_ID_3', title: 'Drone view of the land' },
   { youtubeId: 'REPLACE_ID_4', title: 'Registration day' },
 ];

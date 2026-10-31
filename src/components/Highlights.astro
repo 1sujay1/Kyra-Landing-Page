@@ -8,25 +8,21 @@ import mapFacade from '../assets/images/map-facade.jpg'; // [REPLACE] a screensh
   <div class="container-x">
     <div class="reveal mb-12 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
       <div>
-        <p class="eyebrow mb-3">Project highlights</p>
-        <h2 id="highlights-title" class="max-w-2xl">Everything checked before you even visit</h2>
+        <h2 id="highlights-title" class="max-w-2xl">Project Highlights</h2>
       </div>
       <button type="button" class="btn btn-gold justify-self-start" data-open-lead data-intent="brochure" data-track="highlights">
         <Icon name="download" size={18} /> Download brochure
       </button>
     </div>
 
-    <!-- Bento grid: two wide feature tiles, four compact ones -->
+    <!-- Four highlight tiles -->
     <ul class="reveal grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {highlights.map((h) => (
-        <li class:list={[
-          'rounded-[20px] p-6 sm:p-7',
-          h.wide ? 'bg-white/[0.08] ring-1 ring-white/15 lg:col-span-2' : 'bg-white/[0.04] ring-1 ring-white/10',
-        ]}>
+        <li class="rounded-[20px] bg-white/[0.06] p-6 ring-1 ring-white/12 sm:p-7">
           <span class="mb-5 grid size-12 place-items-center rounded-xl bg-gold text-brand">
             <Icon name={h.icon} size={24} />
           </span>
-          <h3 class:list={['mb-2', h.wide && 'sm:text-2xl']}>{h.title}</h3>
+          <h3 class="mb-2">{h.title}</h3>
           <p class="text-[0.95rem] text-white/75">{h.text}</p>
         </li>
       ))}
@@ -36,7 +32,7 @@ import mapFacade from '../assets/images/map-facade.jpg'; // [REPLACE] a screensh
     <div class="reveal mt-16 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
       <div>
         <h3 class="mb-2 text-2xl sm:text-3xl">Location advantages</h3>
-        <p class="mb-6 text-white/75">Approximate distances by road from the project site.</p>
+        <p class="mb-6 text-white/75">Approximate distances by road from the farm.</p>
         <ol class="divide-y divide-white/10 border-y border-white/10">
           {distances.map((d) => (
             <li class="flex items-center justify-between gap-4 py-4">

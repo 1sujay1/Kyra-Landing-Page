@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // [VERIFY] final production domain (also update public/robots.txt, public/.htaccess
 // and ALLOWED_ORIGIN in /home/<user>/private/config.php).
-const SITE = 'https://kyragroupindia.com';
+const SITE = 'https://farmland.kyragroupindia.com';
 
 export default defineConfig({
   site: SITE,
